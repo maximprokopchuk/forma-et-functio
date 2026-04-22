@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Newsreader, Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthSessionProvider } from "@/components/session-provider";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 import "./globals.css";
 
 // Display — serif with expressive italic, used for wordmark and headlines.
@@ -51,7 +54,13 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <AuthSessionProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </AuthSessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

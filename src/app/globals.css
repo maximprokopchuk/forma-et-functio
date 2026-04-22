@@ -77,6 +77,12 @@
   --baseline-3: calc(var(--baseline) * 3);
   --baseline-4: calc(var(--baseline) * 4);
 
+  /* Motion — one curve, three durations (plan §14). */
+  --ease-paper: cubic-bezier(0.2, 0.0, 0.1, 1.0);
+  --dur-micro: 120ms;
+  --dur-small: 240ms;
+  --dur-large: 480ms;
+
   /* Palette — light ("printed book")
      Approx hex targets from plan:
      paper       #F4F1EA
@@ -178,5 +184,126 @@
   .dark ::selection {
     background-color: oklch(0.68 0.18 35 / 0.28);
     color: inherit;
+  }
+}
+
+/*
+ * Typography scale — plan §16.1.
+ * All font-sizes and line-heights snapped to 8px baseline.
+ * Display = Newsreader (serif), UI / caption / mono = Inter / JetBrains Mono.
+ */
+@layer utilities {
+  .text-display-xl {
+    font-family: var(--font-display);
+    font-size: 96px;
+    line-height: 96px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+  .text-display-l {
+    font-family: var(--font-display);
+    font-size: 68px;
+    line-height: 72px;
+    font-weight: 400;
+  }
+  .text-display-m {
+    font-family: var(--font-display);
+    font-size: 48px;
+    line-height: 56px;
+    font-weight: 400;
+  }
+  .text-h1 {
+    font-family: var(--font-display);
+    font-size: 34px;
+    line-height: 40px;
+    font-weight: 500;
+  }
+  .text-h2 {
+    font-family: var(--font-display);
+    font-size: 27px;
+    line-height: 36px;
+    font-weight: 500;
+  }
+  .text-h3 {
+    font-family: var(--font-sans);
+    font-size: 22px;
+    line-height: 32px;
+    font-weight: 700;
+  }
+  .text-body-l {
+    font-family: var(--font-display);
+    font-size: 19px;
+    line-height: 28px;
+    font-weight: 400;
+  }
+  .text-body {
+    font-family: var(--font-display);
+    font-size: 17px;
+    line-height: 28px;
+    font-weight: 400;
+  }
+  .text-body-s {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 24px;
+    font-weight: 400;
+  }
+  .text-caption {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 20px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-feature-settings: "smcp" 1, "c2sc" 1, "tnum" 1;
+  }
+  .text-mono {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 24px;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Reading measure — 62-68 characters on wide screens, full-width on narrow. */
+  .reading-measure {
+    max-width: 68ch;
+  }
+  @media (max-width: 1024px) {
+    .reading-measure {
+      max-width: 100%;
+    }
+  }
+
+  /*
+   * 16-column editorial grid (plan §16). Desktop gives the full 16 tracks with
+   * 24px gutters; tablet collapses to 8; mobile falls to a single column.
+   */
+  .grid-16 {
+    display: grid;
+    grid-template-columns: repeat(16, minmax(0, 1fr));
+    column-gap: 24px;
+    padding-inline: 80px;
+  }
+  @media (max-width: 1280px) {
+    .grid-16 {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      padding-inline: 24px;
+    }
+  }
+  @media (max-width: 768px) {
+    .grid-16 {
+      grid-template-columns: minmax(0, 1fr);
+      padding-inline: 16px;
+    }
+  }
+
+  /* Motion — utilities matching the three durations. */
+  .motion-micro {
+    transition: all var(--dur-micro) var(--ease-paper);
+  }
+  .motion-small {
+    transition: all var(--dur-small) var(--ease-paper);
+  }
+  .motion-large {
+    transition: all var(--dur-large) var(--ease-paper);
   }
 }
