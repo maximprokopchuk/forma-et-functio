@@ -1,0 +1,182 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/*
+ * Dark-mode variant fix — same pattern as diabolus.
+ * Allows both `:root.dark` and `.dark *` selectors to work.
+ */
+@custom-variant dark (&:is(.dark, .dark *));
+
+/*
+ * Theme bridge. Tailwind v4 reads `--color-*` / `--font-*` tokens
+ * at compile time and exposes them as utility classes
+ * (e.g. `bg-paper`, `text-ink`, `border-rule`, `font-display`).
+ */
+@theme inline {
+  /* Semantic aliases */
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+
+  /* Palette — forma et functio */
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-rule: var(--rule);
+  --color-cinnabar: var(--cinnabar);
+  --color-lapis: var(--lapis);
+  --color-ochre: var(--ochre);
+
+  /* shadcn token bridge — so copied shadcn/ui components keep working.
+     These are thin aliases onto our palette; real design decisions live
+     in the editorial tokens above. */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Fonts */
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* shadcn radius — editorial, so keep minimal */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+}
+
+/*
+ * Design tokens — OKLCH for perceptual uniformity.
+ * Palette per implementation-plan §2.4.
+ * Light = printed book. Dark = studio at night.
+ */
+:root {
+  /* Font families (set concretely here; next/font injects its own --font-* variables
+     which we remap in layout.tsx). */
+  --font-display: "Newsreader", Georgia, serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* Baseline grid — 8px rhythm */
+  --baseline: 8px;
+  --baseline-2: calc(var(--baseline) * 2);
+  --baseline-3: calc(var(--baseline) * 3);
+  --baseline-4: calc(var(--baseline) * 4);
+
+  /* Palette — light ("printed book")
+     Approx hex targets from plan:
+     paper       #F4F1EA
+     ink         #14110F
+     rule        #C8C3B8
+     cinnabar    #D8412F
+     lapis       #1B3A8B
+     ochre       #E3B23C
+  */
+  --paper: oklch(0.96 0.01 85);
+  --ink: oklch(0.18 0.01 60);
+  --ink-muted: oklch(0.18 0.01 60 / 0.6);
+  --rule: oklch(0.82 0.01 80);
+  --cinnabar: oklch(0.62 0.18 35);
+  --lapis: oklch(0.36 0.14 265);
+  --ochre: oklch(0.78 0.13 85);
+
+  /* shadcn bridge — mapped onto editorial palette */
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--cinnabar);
+  --primary-foreground: oklch(0.96 0.01 85);
+  --secondary: oklch(0.93 0.01 80);
+  --secondary-foreground: var(--ink);
+  --muted: oklch(0.93 0.01 80);
+  --muted-foreground: var(--ink-muted);
+  --accent: oklch(0.93 0.01 80);
+  --accent-foreground: var(--ink);
+  --destructive: oklch(0.58 0.22 25);
+  --destructive-foreground: oklch(0.96 0.01 85);
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--cinnabar);
+}
+
+/*
+ * Dark — "Студия". Not an inversion. Brown-black bg + cream text,
+ * cinnabar shifts warmer/brighter.
+ * Targets:
+ *   paper-dark  #16130E
+ *   ink-dark    #ECE6D8
+ *   rule-dark   #2A2722
+ *   cinnabar-d  #E8604D
+ *   lapis-d     #4B6AC9
+ *   ochre-d     #F0C858
+ */
+:root.dark,
+.dark {
+  --paper: oklch(0.17 0.012 60);
+  --ink: oklch(0.92 0.02 85);
+  --ink-muted: oklch(0.92 0.02 85 / 0.6);
+  --rule: oklch(0.26 0.008 60);
+  --cinnabar: oklch(0.68 0.18 35);
+  --lapis: oklch(0.58 0.14 265);
+  --ochre: oklch(0.84 0.13 85);
+
+  /* shadcn bridge — dark */
+  --card: oklch(0.19 0.012 60);
+  --card-foreground: var(--ink);
+  --popover: oklch(0.19 0.012 60);
+  --popover-foreground: var(--ink);
+  --primary: var(--cinnabar);
+  --primary-foreground: oklch(0.17 0.012 60);
+  --secondary: oklch(0.24 0.01 60);
+  --secondary-foreground: var(--ink);
+  --muted: oklch(0.24 0.01 60);
+  --muted-foreground: var(--ink-muted);
+  --accent: oklch(0.24 0.01 60);
+  --accent-foreground: var(--ink);
+  --destructive: oklch(0.65 0.22 25);
+  --destructive-foreground: oklch(0.96 0.01 85);
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--cinnabar);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+    /* 8px baseline snap for all vertical rhythm */
+    line-height: calc(var(--baseline) * 3);
+  }
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  }
+  /* Text selection — cinnabar tint */
+  ::selection {
+    background-color: oklch(0.62 0.18 35 / 0.18);
+    color: inherit;
+  }
+  .dark ::selection {
+    background-color: oklch(0.68 0.18 35 / 0.28);
+    color: inherit;
+  }
+}
