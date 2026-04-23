@@ -39,6 +39,12 @@ export async function Header() {
             >
               Виджеты
             </Link>
+            <Link
+              href="/gallery"
+              className="text-caption text-ink motion-micro hover:text-cinnabar"
+            >
+              Галерея
+            </Link>
             {isAuthed ? (
               <Link
                 href="/profile"

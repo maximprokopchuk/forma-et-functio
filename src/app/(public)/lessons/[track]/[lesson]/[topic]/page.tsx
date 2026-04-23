@@ -1,8 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import { getServerSession } from "next-auth";
 import { LogoMark } from "@/components/layout/wordmark";
 import { mdxComponents } from "@/components/mdx/mdx-components";
+import { ChatPanel } from "@/components/chat/chat-panel";
+import { SubmissionForm } from "@/components/submissions/submission-form";
+import { CompleteButton } from "@/components/progress/complete-button";
+import { ReportErrorButton } from "@/components/lessons/report-error-button";
+import { authOptions } from "@/lib/auth";
 import {
   getAllTracks,
   getLesson,
@@ -35,17 +41,87 @@ export default async function TopicPage({
   const components = mdxComponents();
   const nextTopic = findNextTopic(lessonData, topicData);
 
+  const session = await getServerSession(authOptions);
+  const authed = Boolean(session?.user?.id);
+  const pageUrl = `/lessons/${track}/${lesson}/${topic}`;
+
   return (
     <article className="bg-paper">
       <BandHero track={trackData} lesson={lessonData} topic={topicData} />
       <BandReading content={topicData.content} components={components} />
+
+      <BandInteract
+        lessonSlug={lesson}
+        topicSlug={topic}
+        rubricId={topicData.rubricId}
+        authed={authed}
+        pageUrl={pageUrl}
+      />
+
       <BandSynthesis
         topic={topicData}
         trackSlug={track}
         lessonSlug={lesson}
         nextTopic={nextTopic}
       />
+
+      <ChatPanel
+        lessonSlug={lesson}
+        topicSlug={topic}
+        authed={authed}
+      />
     </article>
+  );
+}
+
+function BandInteract({
+  lessonSlug,
+  topicSlug,
+  rubricId,
+  authed,
+  pageUrl,
+}: {
+  lessonSlug: string;
+  topicSlug: string;
+  rubricId?: string;
+  authed: boolean;
+  pageUrl: string;
+}) {
+  return (
+    <section
+      className="grid-16 bg-paper"
+      style={{
+        paddingBlock: "64px",
+        borderTop: "0.5px solid var(--rule)",
+      }}
+      aria-label="Упражнения и прогресс"
+    >
+      <div
+        className="col-span-full xl:col-span-8 xl:col-start-3 flex flex-col"
+        style={{ gap: "48px" }}
+      >
+        {rubricId ? (
+          <SubmissionForm
+            lessonSlug={lessonSlug}
+            topicSlug={topicSlug}
+            rubricId={rubricId}
+            authed={authed}
+          />
+        ) : null}
+
+        <CompleteButton
+          lessonSlug={lessonSlug}
+          topicSlug={topicSlug}
+          authed={authed}
+        />
+
+        <ReportErrorButton
+          lessonSlug={lessonSlug}
+          topicSlug={topicSlug}
+          pageUrl={pageUrl}
+        />
+      </div>
+    </section>
   );
 }
 
