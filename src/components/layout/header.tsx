@@ -11,6 +11,7 @@ import { ThemeToggle } from "./theme-toggle";
 export async function Header() {
   const session = await getServerSession(authOptions);
   const isAuthed = Boolean(session?.user?.id);
+  const isAdmin = session?.user?.role === "ADMIN";
 
   return (
     <header className="relative w-full bg-paper">
@@ -45,6 +46,14 @@ export async function Header() {
             >
               Галерея
             </Link>
+            {isAdmin ? (
+              <Link
+                href="/admin"
+                className="text-caption text-ink motion-micro hover:text-cinnabar"
+              >
+                Админ
+              </Link>
+            ) : null}
             {isAuthed ? (
               <Link
                 href="/profile"
