@@ -7,6 +7,9 @@ import { FigureDidactic } from "@/components/mdx/figure-didactic";
 import { Exercise } from "@/components/mdx/exercise";
 import { Quiz } from "@/components/mdx/quiz";
 import { HierarchyReorder } from "@/components/widgets/hierarchy-reorder";
+import { ColorContrastSandbox } from "@/components/widgets/color-contrast-sandbox";
+import { TypePairingLab } from "@/components/widgets/type-pairing-lab";
+import { SpacingTuner } from "@/components/widgets/spacing-tuner";
 
 /**
  * Component map exposed to MDX content.
@@ -28,6 +31,9 @@ export function mdxComponents(components: MDXComponents = {}): MDXComponents {
     Exercise,
     Quiz,
     HierarchyReorder,
+    ColorContrastSandbox,
+    TypePairingLab,
+    SpacingTuner,
 
     // --- HTML element overrides (editorial typography):
     h1: ({ children, ...props }) => (
