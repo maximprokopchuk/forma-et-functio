@@ -4,7 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Wordmark } from "@/components/layout/wordmark";
-import { MOCK_TRACKS, type TrackAccent, type TrackSlug } from "@/lib/mock-data";
+import {
+  TRACKS,
+  TRACK_SLUGS,
+  type TrackAccent,
+  type TrackSlug,
+} from "@/lib/tracks";
 
 type Screen = 1 | 2 | 3 | 4;
 
@@ -194,19 +199,20 @@ function ScreenTrack({
       >
         Выберите трек
       </p>
-      {MOCK_TRACKS.map((t) => {
-        const isSelected = selected === t.slug;
+      {TRACK_SLUGS.map((slug) => {
+        const t = TRACKS[slug];
+        const isSelected = selected === slug;
         return (
           <button
-            key={t.slug}
+            key={slug}
             type="button"
-            onClick={() => onSelect(t.slug)}
+            onClick={() => onSelect(slug)}
             className="group relative block w-full border-t border-rule bg-paper text-left motion-small hover:bg-[oklch(0.94_0.01_85)]"
           >
             <div className="grid-16 relative" style={{ paddingBlock: "40px" }}>
               <span
                 aria-hidden
-                className={`absolute top-0 bottom-0 w-1 ${ACCENT_BG[t.accent]}`}
+                className={`absolute top-0 bottom-0 w-1 ${ACCENT_BG[t.colorToken]}`}
                 style={{ left: "80px" }}
               />
               <div className="col-span-full flex flex-col gap-2 xl:col-span-8 xl:col-start-3">

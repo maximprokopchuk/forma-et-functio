@@ -1,52 +1,113 @@
 import Link from "next/link";
-import { getMockTrack } from "@/lib/mock-data";
+import { notFound } from "next/navigation";
+import { MDXRemote } from "next-mdx-remote/rsc";
 import { LogoMark } from "@/components/layout/wordmark";
+import { mdxComponents } from "@/components/mdx/mdx-components";
+import {
+  getAllTracks,
+  getLesson,
+  getTopic,
+  type LessonWithTopics,
+  type TopicMeta,
+  type TrackWithLessons,
+} from "@/lib/content";
 
 /**
- * Topic page scaffold — plan §20.3.
+ * Topic page — plan §20.3.
  * Three bands: hero / reading+margin notes / synthesis.
- * All content is mock — real MDX pipeline arrives in Phase 2.
+ * Content is loaded from MDX via `getTopic` and rendered with next-mdx-remote
+ * using our custom component map. remark-directive is skipped for v1 —
+ * authors write JSX directly, which is simpler and keeps the pipeline light.
  */
 export default async function TopicPage({
   params,
 }: {
   params: Promise<{ track: string; lesson: string; topic: string }>;
 }) {
-  const { track } = await params;
-  const meta = getMockTrack(track);
-  const trackLabel = meta?.shortTitle ?? "FOUNDATIONS";
+  const { track, lesson, topic } = await params;
+  const trackData = getAllTracks().find((t) => t.slug === track);
+  if (!trackData) notFound();
+  const lessonData = getLesson(track, lesson);
+  if (!lessonData) notFound();
+  const topicData = getTopic(track, lesson, topic);
+  if (!topicData) notFound();
+
+  const components = mdxComponents();
+  const nextTopic = findNextTopic(lessonData, topicData);
 
   return (
     <article className="bg-paper">
-      <BandHero trackLabel={trackLabel} />
-      <BandReading />
-      <BandSynthesis />
+      <BandHero track={trackData} lesson={lessonData} topic={topicData} />
+      <BandReading content={topicData.content} components={components} />
+      <BandSynthesis
+        topic={topicData}
+        trackSlug={track}
+        lessonSlug={lesson}
+        nextTopic={nextTopic}
+      />
     </article>
   );
 }
 
-function BandHero({ trackLabel }: { trackLabel: string }) {
+export async function generateStaticParams() {
+  const params: { track: string; lesson: string; topic: string }[] = [];
+  for (const track of getAllTracks()) {
+    for (const lesson of track.lessons) {
+      for (const topic of lesson.topics) {
+        params.push({
+          track: track.slug,
+          lesson: lesson.slug,
+          topic: topic.slug,
+        });
+      }
+    }
+  }
+  return params;
+}
+
+function findNextTopic(
+  lesson: LessonWithTopics,
+  current: TopicMeta,
+): TopicMeta | null {
+  const idx = lesson.topics.findIndex((t) => t.slug === current.slug);
+  if (idx === -1) return null;
+  return lesson.topics[idx + 1] ?? null;
+}
+
+function BandHero({
+  track,
+  lesson,
+  topic,
+}: {
+  track: TrackWithLessons;
+  lesson: LessonWithTopics;
+  topic: TopicMeta;
+}) {
   return (
     <section
       className="relative w-full bg-paper"
       style={{ minHeight: "60vh" }}
       aria-label="Обложка темы"
     >
-      {/* Placeholder Munari-style composition — squares in cinnabar on paper. */}
       <HeroComposition />
 
-      {/* Bottom-left breadcrumb, 80px inset to match 16-col outer margin. */}
       <div
         className="absolute bottom-8 left-0 right-0"
         style={{ paddingInline: "80px" }}
       >
         <p className="text-caption text-ink-muted">
-          Трек {trackLabel} · Раздел 04 · Тема 03 ·{" "}
-          <span className="tabular-nums">14</span> мин
+          Трек {track.shortTitle} · Раздел{" "}
+          <span className="tabular-nums">
+            {String(lesson.order).padStart(2, "0")}
+          </span>{" "}
+          · Тема{" "}
+          <span className="tabular-nums">
+            {String(topic.order).padStart(2, "0")}
+          </span>{" "}
+          · <span className="tabular-nums">{topic.estimatedMinutes}</span> мин
         </p>
       </div>
 
-      {/* Top-right LogoMark linking home. */}
       <div className="absolute right-0 top-0" style={{ padding: "24px 80px" }}>
         <Link
           href="/"
@@ -60,8 +121,12 @@ function BandHero({ trackLabel }: { trackLabel: string }) {
   );
 }
 
+/**
+ * Placeholder Munari-style composition. Each topic will eventually get a
+ * bespoke hero image (historical reproduction, diagram or specimen).
+ * Keep it abstract and paper-bg so the eye rests before entering the body.
+ */
 function HeroComposition() {
-  // Munari/Albers-ish composition — nested squares, flat cinnabar on paper.
   return (
     <svg
       viewBox="0 0 800 600"
@@ -93,147 +158,47 @@ function HeroComposition() {
   );
 }
 
-function BandReading() {
+function BandReading({
+  content,
+  components,
+}: {
+  content: string;
+  components: ReturnType<typeof mdxComponents>;
+}) {
   return (
     <section
       className="grid-16 bg-paper"
       style={{ paddingBlock: "96px" }}
       aria-label="Основной текст"
     >
-      {/* Main column, cols 3-10. */}
-      <div className="col-span-full flex flex-col gap-6 xl:col-span-8 xl:col-start-3">
-        <p className="text-body text-ink">
-          <span
-            className="float-left mr-2 text-cinnabar"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "84px",
-              lineHeight: "72px",
-              paddingTop: "4px",
-            }}
-          >
-            Т
-          </span>
-          ипографика — это язык, на котором страница говорит с читателем до того,
-          как он дочитает первое слово. Интервал, выключка, контраст кеглей —
-          всё это грамматика, и её можно учить так же строго, как синтаксис
-          русского или JavaScript. В цифровой среде эта грамматика становится
-          инструментом: вы не печатаете плакат, а задаёте правила, по которым
-          браузер соберёт текст на чужом экране.
-        </p>
-        <p className="text-body text-ink">
-          Хорошая типографика незаметна, как хороший звук в кино: вы понимаете
-          сюжет, а не думаете о микрофоне. Плохая — сразу даёт о себе знать:
-          слишком плотные строки, шрифт не под кегль, кернинг стреляет в глаза.
-          Это ремесло измеряется отсутствием, а не присутствием.
-        </p>
-
-        <h2 className="text-caption text-ink" style={{ marginBlock: "24px" }}>
-          § 01 · Пропорции
-        </h2>
-
-        <p className="text-body text-ink">
-          Модульная шкала — это ряд размеров, связанных одним отношением.
-          Классическое 1.25 (major third) даёт мягкую иерархию, 1.414 (корень из
-          двух) — жёсткую, архитектурную. Выбор шкалы — это выбор интонации:
-          вы пишете журнал или составляете спецификацию.
-        </p>
-
-        <ExerciseBlock />
-
-        <p className="text-body text-ink">
-          Наконец, помните: правила существуют, чтобы их нарушать осознанно.
-          Дроп-кап, висячая пунктуация, нестандартный интерлиньяж — всё это
-          приёмы, уместные тогда, когда автор понимает, что теряет, решая их
-          применить.
-        </p>
+      {/* Main reading column — cols 3-10 on desktop. */}
+      <div className="col-span-full xl:col-span-8 xl:col-start-3">
+        <div className="mdx-prose">
+          <MDXRemote
+            source={content}
+            components={components}
+            /* Content is authored in-repo, not user-supplied.
+               Disable the blockJS guard so attribute expressions like
+               `options={[{ text, correct }]}` survive compilation. */
+            options={{ blockJS: false }}
+          />
+        </div>
       </div>
-
-      {/* Margin notes, cols 12-15. */}
-      <aside
-        className="col-span-full flex flex-col gap-6 xl:col-span-4 xl:col-start-12"
-        aria-label="Поля"
-      >
-        <MarginNote>
-          <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic" }}>
-            Modular scale
-          </span>
-          {" — "}
-          ряд размеров, построенный на одном соотношении; базовое значение
-          обычно 16px.
-        </MarginNote>
-        <MarginNote>
-          Эмиль Рудер,{" "}
-          <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic" }}>
-            Typographie
-          </span>
-          , 1967 — каноничный разворот о вертикальном ритме.
-        </MarginNote>
-        <MarginNote>
-          См. также:{" "}
-          <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic" }}>
-            модульная шкала в CSS
-          </span>
-          {" — "}тема 04 этого раздела.
-        </MarginNote>
-      </aside>
     </section>
   );
 }
 
-function MarginNote({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-2">
-      <div
-        aria-hidden
-        className="h-px w-full bg-rule"
-        style={{ transform: "scaleY(0.5)", transformOrigin: "top" }}
-      />
-      <p
-        className="text-ink-muted"
-        style={{
-          fontFamily: "var(--font-display)",
-          fontStyle: "italic",
-          fontSize: "13px",
-          lineHeight: "20px",
-        }}
-      >
-        {children}
-      </p>
-    </div>
-  );
-}
-
-function ExerciseBlock() {
-  return (
-    <figure className="flex flex-col gap-4" style={{ marginBlock: "24px" }}>
-      <div
-        aria-hidden
-        className="h-px w-full bg-ochre"
-        style={{ transform: "scaleY(0.5)", transformOrigin: "top" }}
-      />
-      <p className="text-caption text-ochre">Упражнение</p>
-      <div
-        className="text-caption text-ink-muted"
-        style={{
-          height: "192px",
-          padding: "16px",
-          borderRadius: "2px",
-          background: "oklch(0.96 0.01 85)",
-        }}
-      >
-        Интерактивное упражнение здесь
-      </div>
-      <div
-        aria-hidden
-        className="h-px w-full bg-ochre"
-        style={{ transform: "scaleY(0.5)", transformOrigin: "bottom" }}
-      />
-    </figure>
-  );
-}
-
-function BandSynthesis() {
+function BandSynthesis({
+  topic,
+  trackSlug,
+  lessonSlug,
+  nextTopic,
+}: {
+  topic: TopicMeta;
+  trackSlug: string;
+  lessonSlug: string;
+  nextTopic: TopicMeta | null;
+}) {
   return (
     <section
       aria-label="Итог"
@@ -242,29 +207,30 @@ function BandSynthesis() {
     >
       <div className="col-span-full flex flex-col gap-8 xl:col-span-10 xl:col-start-3">
         <p className="text-caption">Итог</p>
-        <h2 className="text-display-m">Что с этим делать</h2>
-        <ul className="flex flex-col gap-4" style={{ marginBlock: "16px" }}>
-          <li className="text-body-l">
-            — Типографика описывается правилами, а не чутьём; чутьё приходит
-            потом.
-          </li>
-          <li className="text-body-l">
-            — Модульная шкала — это интонация страницы; выберите её до первого
-            макета.
-          </li>
-          <li className="text-body-l">
-            — Хорошая вёрстка незаметна. Измеряйте её отсутствием вопросов, а не
-            обилием приёмов.
-          </li>
-        </ul>
-        <p>
-          <Link
-            href="#"
-            className="text-h3 text-paper motion-small hover:underline"
-          >
-            Следующая тема →
-          </Link>
+        <h2 className="text-display-m">{topic.title}</h2>
+        <p className="text-body-l" style={{ maxWidth: "48ch" }}>
+          {topic.description}
         </p>
+
+        {nextTopic ? (
+          <p>
+            <Link
+              href={`/lessons/${trackSlug}/${lessonSlug}/${nextTopic.slug}`}
+              className="text-h3 text-paper motion-small hover:underline underline-offset-4"
+            >
+              Следующая тема: {nextTopic.title} →
+            </Link>
+          </p>
+        ) : (
+          <p>
+            <Link
+              href={`/lessons/${trackSlug}`}
+              className="text-h3 text-paper motion-small hover:underline underline-offset-4"
+            >
+              Вернуться к разделу →
+            </Link>
+          </p>
+        )}
       </div>
     </section>
   );
