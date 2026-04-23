@@ -1,8 +1,14 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
+/**
+ * Routing proxy — plan §23 Phase 7.
+ * Renamed from `middleware.ts` in Next 16 (file convention deprecation).
+ * Same behaviour as before: auth-guard admin/profile/progress/onboarding,
+ * bounce logged-in users away from /login and /register.
+ */
 export default withAuth(
-  function middleware(req) {
+  function proxy(req) {
     const { pathname } = req.nextUrl;
     const token = req.nextauth.token;
 

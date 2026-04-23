@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import {
   Newsreader,
   PT_Serif,
@@ -86,6 +87,27 @@ export const metadata: Metadata = {
   },
   description:
     "Самоучитель веб-дизайна с интерактивной практикой и AI-фидбеком — для тех, кто хочет дизайнить и понимать, как это работает в коде.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  ),
+  openGraph: {
+    title: "Forma et Functio — Учебник цифрового дизайна",
+    description:
+      "Самоучитель веб-дизайна с интерактивной практикой и AI-фидбеком.",
+    type: "website",
+    locale: "ru_RU",
+    siteName: "Forma et Functio",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Forma et Functio — Учебник цифрового дизайна",
+    description:
+      "Самоучитель веб-дизайна с интерактивной практикой и AI-фидбеком.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -93,6 +115,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Plausible is optional. It only loads when NEXT_PUBLIC_PLAUSIBLE_DOMAIN
+  // is set in the environment — keeps the dev/self-host path free of a
+  // third-party request and lets the user enable it without a code change.
+  const plausibleDomain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
+
   return (
     <html
       lang="ru"
@@ -107,6 +134,14 @@ export default function RootLayout({
             <Footer />
           </AuthSessionProvider>
         </ThemeProvider>
+        {plausibleDomain ? (
+          <Script
+            defer
+            data-domain={plausibleDomain}
+            src="https://plausible.io/js/script.js"
+            strategy="afterInteractive"
+          />
+        ) : null}
       </body>
     </html>
   );

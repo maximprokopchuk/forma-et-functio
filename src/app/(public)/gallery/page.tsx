@@ -11,6 +11,20 @@ export const metadata: Metadata = {
   title: "Галерея работ",
   description:
     "Публичные работы студентов, отправленные на AI-проверку. Опционально — участники сами решают показать свою работу.",
+  openGraph: {
+    title: "Галерея работ — Forma et Functio",
+    description:
+      "Публичные работы студентов Forma et Functio с AI-разбором по рубрике.",
+    type: "website",
+    locale: "ru_RU",
+    siteName: "Forma et Functio",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Галерея работ — Forma et Functio",
+    description:
+      "Публичные работы студентов Forma et Functio с AI-разбором по рубрике.",
+  },
 };
 
 /**

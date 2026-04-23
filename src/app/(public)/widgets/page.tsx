@@ -13,6 +13,20 @@ export const metadata: Metadata = {
   title: "Виджеты",
   description:
     "Интерактивные упражнения для практики — демо пяти виджетов Forma et Functio.",
+  openGraph: {
+    title: "Виджеты — Forma et Functio",
+    description:
+      "Интерактивные упражнения для практики: иерархия, контраст, типографика, пространство, доступность.",
+    type: "website",
+    locale: "ru_RU",
+    siteName: "Forma et Functio",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Виджеты — Forma et Functio",
+    description:
+      "Интерактивные упражнения для практики: иерархия, контраст, типографика, пространство, доступность.",
+  },
 };
 
 /**

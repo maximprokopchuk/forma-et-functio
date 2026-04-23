@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getServerSession } from "next-auth";
 import { LogoMark } from "@/components/layout/wordmark";
@@ -139,6 +140,36 @@ export async function generateStaticParams() {
     }
   }
   return params;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ track: string; lesson: string; topic: string }>;
+}): Promise<Metadata> {
+  const { track, lesson, topic } = await params;
+  const topicData = getTopic(track, lesson, topic);
+  if (!topicData) {
+    return { title: "Тема не найдена" };
+  }
+  const title = topicData.title;
+  const description = topicData.description;
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${title} — Forma et Functio`,
+      description,
+      type: "article",
+      locale: "ru_RU",
+      siteName: "Forma et Functio",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} — Forma et Functio`,
+      description,
+    },
+  };
 }
 
 function findNextTopic(

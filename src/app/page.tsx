@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/layout/wordmark";
 import { getAllTracks, getTrackStats } from "@/lib/content";
+import { plural } from "@/lib/pluralize";
 import type { TrackAccent } from "@/lib/tracks";
 
 /**
@@ -54,8 +55,14 @@ function HeroFold({
           </p>
 
           <div className="flex flex-col gap-2 xl:col-span-4 xl:col-start-10">
-            <HeroCaption value={String(totalTopics)} label="тем" />
-            <HeroCaption value={String(trackCount)} label="трека" />
+            <HeroCaption
+              value={String(totalTopics)}
+              label={plural(totalTopics, ["тема", "темы", "тем"])}
+            />
+            <HeroCaption
+              value={String(trackCount)}
+              label={plural(trackCount, ["трек", "трека", "треков"])}
+            />
             <HeroCaption label="Живые примеры" />
             <HeroCaption label="На русском" />
           </div>
@@ -172,8 +179,10 @@ function TrackRow({
           <p className="text-caption text-ink-muted">
             {hasContent ? (
               <>
-                <span className="text-ink tabular-nums">{topicCount}</span> тем ·{" "}
-                <span className="text-ink tabular-nums">{hours}</span> часов
+                <span className="text-ink tabular-nums">{topicCount}</span>{" "}
+                {plural(topicCount, ["тема", "темы", "тем"])} ·{" "}
+                <span className="text-ink tabular-nums">{hours}</span>{" "}
+                {plural(hours, ["час", "часа", "часов"])}
               </>
             ) : (
               <span className="text-ink-muted">Скоро</span>

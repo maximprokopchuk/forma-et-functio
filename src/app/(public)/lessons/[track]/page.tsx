@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import type { Metadata } from "next";
 import {
   getAllTracks,
   getTrack,
   type LessonWithTopics,
 } from "@/lib/content";
+import { plural } from "@/lib/pluralize";
 
 /**
  * Track page — plan §20.2.
@@ -110,14 +112,16 @@ function LessonRow({
 
         <div className="col-span-full xl:col-span-2 xl:col-start-10 xl:self-center">
           <p className="text-caption text-ink-muted">
-            <span className="tabular-nums">{minutes}</span> мин ·{" "}
+            <span className="tabular-nums">{minutes}</span>{" "}
+            {plural(minutes, ["минута", "минуты", "минут"])} ·{" "}
             {lesson.level}
           </p>
         </div>
 
         <div className="col-span-full xl:col-span-3 xl:col-start-13 xl:self-center">
-          <p className="text-caption text-ink-muted tabular-nums">
-            {lesson.topics.length} тем
+          <p className="text-caption text-ink-muted">
+            <span className="tabular-nums">{lesson.topics.length}</span>{" "}
+            {plural(lesson.topics.length, ["тема", "темы", "тем"])}
           </p>
         </div>
       </div>
@@ -203,4 +207,34 @@ function StructDiagram({ count }: { count: number }) {
 
 export async function generateStaticParams() {
   return getAllTracks().map((t) => ({ track: t.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ track: string }>;
+}): Promise<Metadata> {
+  const { track } = await params;
+  const trackData = getTrack(track);
+  if (!trackData) {
+    return { title: "Трек не найден" };
+  }
+  const title = `${trackData.title} — Forma et Functio`;
+  const description = trackData.manifesto;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      locale: "ru_RU",
+      siteName: "Forma et Functio",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
 }
