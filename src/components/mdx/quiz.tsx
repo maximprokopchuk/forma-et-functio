@@ -63,7 +63,7 @@ export function Quiz({
                 disabled={isAnswered}
                 className={cn(
                   "group flex w-full items-start gap-4 border-b border-rule py-3 text-left motion-small",
-                  !isAnswered && "hover:bg-[oklch(0.94_0.01_85)]",
+                  !isAnswered && "hover:bg-paper-hover",
                   chosen && isCorrect && "text-cinnabar",
                   chosen && !isCorrect && "text-ink-muted",
                   !chosen && revealsCorrect && "text-cinnabar",

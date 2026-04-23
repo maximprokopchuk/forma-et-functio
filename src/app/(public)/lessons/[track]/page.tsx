@@ -91,7 +91,7 @@ function LessonRow({
   return (
     <Link
       href={href}
-      className="group block border-b border-rule motion-small hover:bg-[oklch(0.94_0.01_85)]"
+      className="group block border-b border-rule motion-small hover:bg-paper-hover"
     >
       <div className="grid-16" style={{ paddingBlock: "32px" }}>
         <div className="col-span-full xl:col-span-1 xl:col-start-3">

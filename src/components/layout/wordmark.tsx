@@ -3,14 +3,21 @@ import { cn } from "@/lib/utils";
 /**
  * Editorial wordmark — lowercase `forma et functio` with italic cinnabar `et`.
  * Sizes map to the display type scale from plan §16.1.
+ *
+ * `xl` uses a fluid clamp so it fits mobile (down to 44px on 360px viewport)
+ * and still reaches 96px on wide screens. All sizes use hanging `em` so the
+ * italic scales with the wordmark.
  */
 type WordmarkSize = "sm" | "md" | "lg" | "xl";
 
-const SIZE_MAP: Record<WordmarkSize, { fontSize: string; lineHeight: string; tracking: string }> = {
-  sm: { fontSize: "27px", lineHeight: "36px", tracking: "0" },
-  md: { fontSize: "48px", lineHeight: "56px", tracking: "0" },
-  lg: { fontSize: "68px", lineHeight: "72px", tracking: "0.01em" },
-  xl: { fontSize: "96px", lineHeight: "96px", tracking: "0.02em" },
+const SIZE_MAP: Record<
+  WordmarkSize,
+  { fontSize: string; lineHeight: number; tracking: string }
+> = {
+  sm: { fontSize: "27px", lineHeight: 1.18, tracking: "0" },
+  md: { fontSize: "48px", lineHeight: 1.1, tracking: "0" },
+  lg: { fontSize: "clamp(40px, 7.5vw, 68px)", lineHeight: 1.05, tracking: "0.01em" },
+  xl: { fontSize: "clamp(44px, 9vw, 96px)", lineHeight: 1.0, tracking: "0.02em" },
 };
 
 export function Wordmark({

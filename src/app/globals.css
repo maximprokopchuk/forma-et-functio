@@ -19,8 +19,11 @@
 
   /* Palette — forma et functio */
   --color-paper: var(--paper);
+  --color-paper-hover: var(--paper-hover);
+  --color-paper-on-accent: var(--paper-on-accent);
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
+  --color-ink-strip: var(--accent-ink-strip);
   --color-rule: var(--rule);
   --color-cinnabar: var(--cinnabar);
   --color-lapis: var(--lapis);
@@ -65,11 +68,17 @@
  * Light = printed book. Dark = studio at night.
  */
 :root {
-  /* Font families (set concretely here; next/font injects its own --font-* variables
-     which we remap in layout.tsx). */
-  --font-display: "Newsreader", Georgia, serif;
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  /* Font families.
+     next/font (layout.tsx) injects:
+       --font-display-latin  (Newsreader — Latin-only)
+       --font-display-cyr    (PT Serif — Cyrillic-complete)
+       --font-sans           (Inter)
+       --font-mono           (JetBrains Mono)
+     Display chains Latin → Cyrillic → Georgia, so Latin glyphs render in
+     Newsreader while Cyrillic resolves to PT Serif (rather than Georgia,
+     which has very different proportions from Newsreader). */
+  --font-display:
+    var(--font-display-latin), var(--font-display-cyr), Georgia, serif;
 
   /* Baseline grid — 8px rhythm */
   --baseline: 8px;
@@ -95,10 +104,21 @@
   --paper: oklch(0.96 0.01 85);
   --ink: oklch(0.18 0.01 60);
   --ink-muted: oklch(0.18 0.01 60 / 0.6);
-  --rule: oklch(0.82 0.01 80);
+  /* rule: was 0.82 — too faint on paper; bump slightly so hairlines read. */
+  --rule: oklch(0.78 0.01 80);
   --cinnabar: oklch(0.62 0.18 35);
   --lapis: oklch(0.36 0.14 265);
   --ochre: oklch(0.78 0.13 85);
+  /* half-step off paper — used for hover on track/lesson rows. */
+  --paper-hover: oklch(0.93 0.012 85);
+  /* Accent strip for the CRAFT track. In light this is near-black ink;
+     in dark the bg is already near-black so we collapse it to a mid-tone that
+     reads as "neutral rule" rather than "bright bar". */
+  --accent-ink-strip: oklch(0.22 0.01 60);
+  /* Invariant cream — used for text placed on the synthesis cinnabar band.
+     The cinnabar band is "earned" and stays cream-on-red in both themes
+     (text-paper would flip to near-black in dark, losing the treatment). */
+  --paper-on-accent: oklch(0.96 0.012 85);
 
   /* shadcn bridge — mapped onto editorial palette */
   --card: var(--paper);
@@ -123,38 +143,60 @@
 /*
  * Dark — "Студия". Not an inversion. Brown-black bg + cream text,
  * cinnabar shifts warmer/brighter.
- * Targets:
- *   paper-dark  #16130E
- *   ink-dark    #ECE6D8
- *   rule-dark   #2A2722
- *   cinnabar-d  #E8604D
- *   lapis-d     #4B6AC9
+ * Targets (approx hex equivalents):
+ *   paper-dark  #16130E  (warm brown-black, not pitch)
+ *   ink-dark    #ECE6D8  (cream, not white)
+ *   rule-dark   #3A342B  (visible on paper-dark, +12% L step)
+ *   cinnabar-d  #E8604D  (brighter, warmer)
+ *   lapis-d     #7A93DC  (brighter for dark bg)
  *   ochre-d     #F0C858
+ *
+ * ink-strip — a neutral for track accent strips in dark mode. In light, CRAFT
+ * uses bg-ink (dark near-black strip on paper); in dark, we can't just flip to
+ * cream because that screams on paper-dark. So we expose a second token that
+ * collapses the ink→paper inversion for that one accent.
  */
 :root.dark,
 .dark {
-  --paper: oklch(0.17 0.012 60);
-  --ink: oklch(0.92 0.02 85);
-  --ink-muted: oklch(0.92 0.02 85 / 0.6);
-  --rule: oklch(0.26 0.008 60);
-  --cinnabar: oklch(0.68 0.18 35);
-  --lapis: oklch(0.58 0.14 265);
+  /* paper-dark: warm brown-black. Slightly raised L (0.19) and a hair more
+     chroma (0.018) so the brown reads as brown, not pitch black. */
+  --paper: oklch(0.19 0.018 60);
+  /* ink-dark: cream (#ECE6D8). L 0.92, chroma 0.02, warm hue. */
+  --ink: oklch(0.92 0.022 85);
+  --ink-muted: oklch(0.92 0.022 85 / 0.62);
+  /* rule: was 0.26 — too close to bg (0.17) to be visible. Bump to 0.32 so
+     hairlines actually read as lines. Still subdued. */
+  --rule: oklch(0.32 0.012 60);
+  /* cinnabar in dark: brighter + a touch more chroma so it sings on brown-black.
+     Matches the #E8604D target from the plan. */
+  --cinnabar: oklch(0.70 0.19 35);
+  /* lapis in dark: previous 0.58 was too muddy against paper-dark. Raise L. */
+  --lapis: oklch(0.66 0.14 265);
   --ochre: oklch(0.84 0.13 85);
+  /* half-step off paper-dark — hover. Slightly warmer/lifted, stays close. */
+  --paper-hover: oklch(0.23 0.02 60);
+  /* Accent strip — in dark we want it to read as a quiet rule, not a beacon. */
+  --accent-ink-strip: oklch(0.42 0.012 60);
+  /* Invariant cream — stays the same in both themes; used for text on the
+     cinnabar synthesis band so the treatment reads the same in dark. */
+  --paper-on-accent: oklch(0.96 0.012 85);
 
-  /* shadcn bridge — dark */
-  --card: oklch(0.19 0.012 60);
+  /* shadcn bridge — dark. Card/popover sit a hair above paper-dark for lift,
+     but only if someone actually uses them; none of the public editorial
+     routes reference these tokens, so chrome stays minimal. */
+  --card: oklch(0.22 0.016 60);
   --card-foreground: var(--ink);
-  --popover: oklch(0.19 0.012 60);
+  --popover: oklch(0.22 0.016 60);
   --popover-foreground: var(--ink);
   --primary: var(--cinnabar);
-  --primary-foreground: oklch(0.17 0.012 60);
-  --secondary: oklch(0.24 0.01 60);
+  --primary-foreground: oklch(0.19 0.018 60);
+  --secondary: oklch(0.27 0.014 60);
   --secondary-foreground: var(--ink);
-  --muted: oklch(0.24 0.01 60);
+  --muted: oklch(0.27 0.014 60);
   --muted-foreground: var(--ink-muted);
-  --accent: oklch(0.24 0.01 60);
+  --accent: oklch(0.27 0.014 60);
   --accent-foreground: var(--ink);
-  --destructive: oklch(0.65 0.22 25);
+  --destructive: oklch(0.68 0.22 25);
   --destructive-foreground: oklch(0.96 0.01 85);
   --border: var(--rule);
   --input: var(--rule);
@@ -305,5 +347,56 @@
   }
   .motion-large {
     transition: all var(--dur-large) var(--ease-paper);
+  }
+}
+
+/*
+ * MarginNote desktop placement — the reading band gives the main column
+ * cols 3-10 of 16; we want notes to flag out into cols 12-15. We reserve
+ * a breathing gutter via a negative margin-right on the note so the float
+ * lands in the margin area relative to the main column.
+ *
+ * On screens below 1280px the note stacks inline above the following
+ * paragraph, which is exactly what we want (margin columns collapse).
+ */
+.mdx-prose {
+  overflow: visible; /* allow floated margin notes to escape the reading col */
+}
+
+@media (min-width: 1280px) {
+  .mdx-prose .mdx-margin-note {
+    float: right;
+    clear: right;
+    width: 200px;
+    /* The main column is ~8 of 16 cols; margin col 12-15 is 4 cols over to
+       the right of col 11 (a 1-col breathing gutter). Pull out by roughly
+       the width of the note + 1.25 gutters. */
+    margin-right: -232px;
+    margin-left: 24px;
+    /* Nudge the note to baseline-align with the paragraph above. */
+    margin-top: 6px;
+  }
+}
+
+/*
+ * Reading band — paragraph justify + hyphens for a printed-book feel.
+ * Only applies inside .mdx-prose so track/topic meta text is unaffected.
+ */
+.mdx-prose p {
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/*
+ * Focus visibility — one ring, cinnabar, 2px, with a paper-coloured offset
+ * so the ring reads against both paper and paper-dark. Applies to every
+ * interactive element across the editorial palette; shadcn components
+ * retain their own focus-visible treatment.
+ */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--cinnabar);
+    outline-offset: 2px;
+    border-radius: 1px;
   }
 }

@@ -1,17 +1,27 @@
 import type { ReactNode } from "react";
 
 /**
- * MarginNote — Tuftean side note. On desktop (xl+) it sits in cols 12-15 as
- * a floated aside next to the main column; on mobile it renders inline as a
- * italic serif paragraph prefaced by a 0.5px rule.
+ * MarginNote — Tuftean side note.
  *
- * Implementation: we don't use absolute positioning — instead the reading
- * band allocates a margin column and this component renders consistently,
- * with responsive stacking handled by the surrounding grid.
+ * Desktop (xl+): floats into the right margin column using a negative
+ * `margin-right` that pulls the note out of the reading measure. The main
+ * column stays at 8 grid cols; the note lives in cols 12-15 of the 16-col
+ * editorial grid. Prefaced by a 0.5px rule, italic 13/20 serif.
+ *
+ * Mobile / tablet: renders inline above the next paragraph, still prefaced
+ * by a hairline so the eye sees it as a parenthetical, not a beat in the
+ * main flow.
+ *
+ * Why float not grid? MDX's flat paragraph stream can't cleanly nest nodes
+ * into a sibling column without a compile-time transform. Float is the
+ * classical editorial solution (newspaper sidebars) and Safari-stable.
  */
 export function MarginNote({ children }: { children: ReactNode }) {
   return (
-    <aside className="mdx-margin-note flex flex-col gap-2" style={{ marginBlock: "16px" }}>
+    <aside
+      className="mdx-margin-note flex flex-col gap-2"
+      style={{ marginBlock: "16px" }}
+    >
       <div
         aria-hidden
         className="h-px w-full bg-rule"

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Newsreader, Inter, JetBrains_Mono } from "next/font/google";
+import { Newsreader, PT_Serif, Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthSessionProvider } from "@/components/session-provider";
 import { Header } from "@/components/layout/header";
@@ -7,12 +7,23 @@ import { Footer } from "@/components/layout/footer";
 import "./globals.css";
 
 // Display — serif with expressive italic, used for wordmark and headlines.
-// Note: Newsreader on Google Fonts doesn't ship cyrillic; for cyrillic display
-// we'll fall back through the CSS stack (Georgia). Replaceable with GT Alpina later.
+// Newsreader doesn't ship Cyrillic; we chain PT Serif after it (Cyrillic-
+// complete, similar proportions, also from Google Fonts) so Russian glyphs
+// resolve to PT Serif rather than Georgia. Latin still falls to Newsreader.
 const newsreader = Newsreader({
-  variable: "--font-display",
+  variable: "--font-display-latin",
   subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+// Cyrillic-complete serif fallback. Pairs cleanly with Newsreader: both are
+// text-serif with moderate contrast and comparable x-height.
+const ptSerif = PT_Serif({
+  variable: "--font-display-cyr",
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "700"],
   style: ["normal", "italic"],
   display: "swap",
 });
@@ -50,7 +61,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${newsreader.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${newsreader.variable} ${ptSerif.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>

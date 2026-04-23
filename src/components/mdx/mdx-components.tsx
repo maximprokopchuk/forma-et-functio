@@ -147,12 +147,12 @@ export function mdxComponents(components: MDXComponents = {}): MDXComponents {
     ),
     code: ({ children, ...props }) => (
       <code
-        className="text-ink bg-paper"
+        className="text-ink bg-paper-hover"
         style={{
           fontFamily: "var(--font-mono)",
-          fontSize: "0.9em",
-          padding: "1px 4px",
-          border: "0.5px solid var(--rule)",
+          fontSize: "0.88em",
+          padding: "0 4px",
+          borderRadius: "2px",
         }}
         {...props}
       >

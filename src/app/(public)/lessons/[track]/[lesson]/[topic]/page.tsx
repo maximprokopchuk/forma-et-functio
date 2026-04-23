@@ -122,9 +122,10 @@ function BandHero({
 }
 
 /**
- * Placeholder Munari-style composition. Each topic will eventually get a
- * bespoke hero image (historical reproduction, diagram or specimen).
- * Keep it abstract and paper-bg so the eye rests before entering the body.
+ * Placeholder didactic composition. Each topic will eventually get a
+ * bespoke hero (historical reproduction, diagram, specimen). This stand-in
+ * is a Bauhaus-like ratio study: nested hairline frames on paper, one small
+ * cinnabar accent. Cinnabar area stays under 6% of the frame per plan §2.4.
  */
 function HeroComposition() {
   return (
@@ -135,23 +136,41 @@ function HeroComposition() {
       aria-hidden
     >
       <rect x="0" y="0" width="800" height="600" fill="var(--paper)" />
-      <rect x="220" y="160" width="280" height="280" fill="var(--cinnabar)" />
+      {/* Outer golden-ratio rectangle, 1.5px hairline */}
       <rect
-        x="360"
-        y="220"
-        width="160"
-        height="160"
+        x="200"
+        y="140"
+        width="400"
+        height="248"
         fill="none"
         stroke="var(--ink)"
         strokeWidth="1.5"
       />
+      {/* Inner square — the reading measure in miniature */}
       <rect
-        x="420"
-        y="260"
-        width="60"
-        height="60"
-        fill="var(--paper)"
+        x="200"
+        y="140"
+        width="248"
+        height="248"
+        fill="none"
         stroke="var(--ink)"
+        strokeWidth="0.5"
+      />
+      {/* A single cinnabar glyph-sized mark — the accent, earned */}
+      <rect
+        x="556"
+        y="356"
+        width="32"
+        height="32"
+        fill="var(--cinnabar)"
+      />
+      {/* Baseline rule on which the study sits */}
+      <line
+        x1="200"
+        y1="440"
+        x2="600"
+        y2="440"
+        stroke="var(--rule)"
         strokeWidth="0.5"
       />
     </svg>
@@ -202,8 +221,8 @@ function BandSynthesis({
   return (
     <section
       aria-label="Итог"
-      className="grid-16 w-full bg-cinnabar text-paper"
-      style={{ paddingBlock: "96px" }}
+      className="grid-16 w-full bg-cinnabar text-paper-on-accent"
+      style={{ paddingBlock: "112px" }}
     >
       <div className="col-span-full flex flex-col gap-8 xl:col-span-10 xl:col-start-3">
         <p className="text-caption">Итог</p>
@@ -216,7 +235,7 @@ function BandSynthesis({
           <p>
             <Link
               href={`/lessons/${trackSlug}/${lessonSlug}/${nextTopic.slug}`}
-              className="text-h3 text-paper motion-small hover:underline underline-offset-4"
+              className="text-h3 text-paper-on-accent motion-small hover:underline underline-offset-4"
             >
               Следующая тема: {nextTopic.title} →
             </Link>
@@ -225,7 +244,7 @@ function BandSynthesis({
           <p>
             <Link
               href={`/lessons/${trackSlug}`}
-              className="text-h3 text-paper motion-small hover:underline underline-offset-4"
+              className="text-h3 text-paper-on-accent motion-small hover:underline underline-offset-4"
             >
               Вернуться к разделу →
             </Link>

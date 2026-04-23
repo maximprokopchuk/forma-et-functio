@@ -102,11 +102,17 @@ function TrackList() {
   );
 }
 
+/**
+ * CRAFT uses the `ink-strip` token rather than `bg-ink` because in dark mode
+ * `ink` is cream — a bright bar on paper-dark reads as alarm, not accent.
+ * `ink-strip` collapses to a quiet mid-tone in dark and stays near-black in
+ * light. See globals.css.
+ */
 const ACCENT_BG: Record<TrackAccent, string> = {
   cinnabar: "bg-cinnabar",
   lapis: "bg-lapis",
   ochre: "bg-ochre",
-  ink: "bg-ink",
+  ink: "bg-ink-strip",
 };
 
 function TrackRow({
@@ -130,7 +136,7 @@ function TrackRow({
   return (
     <Link
       href={`/lessons/${slug}`}
-      className="group relative block border-t border-rule first:border-t-0 motion-small hover:bg-[oklch(0.94_0.01_85)]"
+      className="group relative block border-t border-rule first:border-t-0 motion-small hover:bg-paper-hover"
     >
       <article
         className="grid-16 relative"
