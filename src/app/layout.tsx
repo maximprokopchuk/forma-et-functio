@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
-import { Newsreader, PT_Serif, Inter, JetBrains_Mono } from "next/font/google";
+import {
+  Newsreader,
+  PT_Serif,
+  Inter,
+  JetBrains_Mono,
+  Playfair_Display,
+  Fraunces,
+  Space_Grotesk,
+} from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthSessionProvider } from "@/components/session-provider";
 import { Header } from "@/components/layout/header";
@@ -44,6 +52,33 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+// --- Fonts loaded only for the TypePairingLab widget (plan §7 #3). ---
+// Kept to three extras so total Google-Fonts surface stays at 7. All have
+// Cyrillic coverage where possible; Playfair and Fraunces are Latin-only but
+// still useful as display specimens for English-set examples.
+const playfair = Playfair_Display({
+  variable: "--font-pair-playfair",
+  subsets: ["latin", "latin-ext", "cyrillic"],
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const fraunces = Fraunces({
+  variable: "--font-pair-fraunces",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-pair-space-grotesk",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "700"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: {
     default: "Forma et Functio — Учебник цифрового дизайна",
@@ -61,7 +96,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${newsreader.variable} ${ptSerif.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${newsreader.variable} ${ptSerif.variable} ${inter.variable} ${jetbrainsMono.variable} ${playfair.variable} ${fraunces.variable} ${spaceGrotesk.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>

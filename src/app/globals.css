@@ -388,6 +388,39 @@
 }
 
 /*
+ * Editorial range input — hairline track, square cinnabar thumb.
+ * Used by widgets (SpacingTuner, etc.) to keep slider styling consistent
+ * with the editorial register: no rounded pills, no gradients.
+ */
+.editorial-range {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 1px;
+  background: var(--rule);
+  outline: none;
+  cursor: pointer;
+}
+.editorial-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--cinnabar);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+.editorial-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--cinnabar);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+/*
  * Focus visibility — one ring, cinnabar, 2px, with a paper-coloured offset
  * so the ring reads against both paper and paper-dark. Applies to every
  * interactive element across the editorial palette; shadcn components

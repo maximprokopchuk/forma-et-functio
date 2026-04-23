@@ -33,6 +33,12 @@ export async function Header() {
             >
               Уроки
             </Link>
+            <Link
+              href="/widgets"
+              className="text-caption text-ink motion-micro hover:text-cinnabar"
+            >
+              Виджеты
+            </Link>
             {isAuthed ? (
               <Link
                 href="/profile"
