@@ -10,6 +10,7 @@ import { HierarchyReorder } from "@/components/widgets/hierarchy-reorder";
 import { ColorContrastSandbox } from "@/components/widgets/color-contrast-sandbox";
 import { TypePairingLab } from "@/components/widgets/type-pairing-lab";
 import { SpacingTuner } from "@/components/widgets/spacing-tuner";
+import { A11ySimulator } from "@/components/widgets/a11y-simulator";
 
 /**
  * Component map exposed to MDX content.
@@ -34,6 +35,7 @@ export function mdxComponents(components: MDXComponents = {}): MDXComponents {
     ColorContrastSandbox,
     TypePairingLab,
     SpacingTuner,
+    A11ySimulator,
 
     // --- HTML element overrides (editorial typography):
     h1: ({ children, ...props }) => (
