@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { LogoMark } from "./wordmark";
 import { ThemeToggle } from "./theme-toggle";
+import { StreakBadge } from "./streak-badge";
 
 /**
  * Editorial header — 72px paper band, logo left, sparse nav right.
@@ -12,6 +13,7 @@ export async function Header() {
   const session = await getServerSession(authOptions);
   const isAuthed = Boolean(session?.user?.id);
   const isAdmin = session?.user?.role === "ADMIN";
+  const userId = session?.user?.id;
 
   return (
     <header className="relative w-full bg-paper">
@@ -62,6 +64,7 @@ export async function Header() {
                 Профиль
               </Link>
             ) : null}
+            {userId ? <StreakBadge userId={userId} /> : null}
             <ThemeToggle />
           </nav>
         </div>

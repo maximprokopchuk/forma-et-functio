@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 /**
  * "Пройдено" toggle — plan §5 / §14.
@@ -22,6 +23,7 @@ type ApiResponse = {
 };
 
 export function CompleteButton({ lessonSlug, topicSlug, authed }: Props) {
+  const router = useRouter();
   const [completed, setCompleted] = useState(false);
   const [streak, setStreak] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -75,13 +77,16 @@ export function CompleteButton({ lessonSlug, topicSlug, authed }: Props) {
       if (data.streakChanged) {
         setFlash(true);
         window.setTimeout(() => setFlash(false), 800);
+        // Refresh server components so the header StreakBadge picks up the
+        // new value without a full navigation.
+        router.refresh();
       }
     } catch {
       setError("Сеть недоступна");
     } finally {
       setLoading(false);
     }
-  }, [authed, completed, lessonSlug, topicSlug, loading]);
+  }, [authed, completed, lessonSlug, topicSlug, loading, router]);
 
   if (!authed) {
     return (
