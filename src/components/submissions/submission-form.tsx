@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
@@ -359,7 +360,7 @@ export function SubmissionForm({
         <p className="text-caption text-cinnabar">{error}</p>
       ) : null}
 
-      <div className="flex items-center" style={{ gap: "16px" }}>
+      <div className="flex items-center flex-wrap" style={{ gap: "20px" }}>
         <button
           type="submit"
           disabled={!description.trim() || status === "submitting"}
@@ -372,6 +373,12 @@ export function SubmissionForm({
         >
           {status === "submitting" ? "Отправка…" : "Отправить на проверку →"}
         </button>
+        <Link
+          href="/gallery"
+          className="text-caption text-ink-muted motion-micro hover:text-cinnabar"
+        >
+          Посмотреть чужие работы ↗
+        </Link>
       </div>
     </form>
   );

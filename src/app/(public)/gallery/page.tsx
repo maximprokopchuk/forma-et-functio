@@ -160,17 +160,30 @@ export default async function GalleryPage({
       >
         <div className="col-span-full xl:col-span-12 xl:col-start-3">
           {items.length === 0 ? (
-            <p
-              className="text-ink-muted"
-              style={{
-                fontFamily: "var(--font-display)",
-                fontStyle: "italic",
-                fontSize: "19px",
-                lineHeight: "30px",
-              }}
-            >
-              Пока нет публичных работ по этому фильтру.
-            </p>
+            <div className="flex flex-col" style={{ gap: "12px" }}>
+              <p
+                className="text-ink-muted"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontStyle: "italic",
+                  fontSize: "19px",
+                  lineHeight: "30px",
+                }}
+              >
+                Пока нет публичных работ по этому фильтру.
+              </p>
+              <Link
+                href="/lessons"
+                className="self-start text-caption text-ink motion-micro hover:text-cinnabar"
+                style={{
+                  border: "0.5px solid var(--rule)",
+                  padding: "10px 18px",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Открыть уроки →
+              </Link>
+            </div>
           ) : (
             <ul
               style={{
@@ -195,7 +208,14 @@ export default async function GalleryPage({
                       month: "long",
                     })}
                   </p>
-                  <h2 className="text-h3 text-ink">{item.userName}</h2>
+                  <h2 className="text-h3 text-ink">
+                    <Link
+                      href={`/gallery/${item.id}`}
+                      className="motion-micro hover:text-cinnabar"
+                    >
+                      {item.userName}
+                    </Link>
+                  </h2>
                   <p
                     className="text-ink"
                     style={{
@@ -221,12 +241,18 @@ export default async function GalleryPage({
                       {item.summary}
                     </p>
                   ) : null}
-                  <div className="flex items-center" style={{ gap: "16px" }}>
+                  <div className="flex items-center flex-wrap" style={{ gap: "16px" }}>
                     {item.overall !== null ? (
                       <p className="text-caption text-ink-muted tabular-nums">
                         Оценка · <span className="text-ink">{item.overall}</span>/5
                       </p>
                     ) : null}
+                    <Link
+                      href={`/gallery/${item.id}`}
+                      className="text-caption text-ink motion-micro hover:text-cinnabar"
+                    >
+                      Полный разбор →
+                    </Link>
                     {item.figmaUrl ? (
                       <a
                         href={item.figmaUrl}
@@ -234,7 +260,7 @@ export default async function GalleryPage({
                         rel="noreferrer noopener"
                         className="text-caption text-lapis underline decoration-lapis/50 underline-offset-2"
                       >
-                        Открыть Figma →
+                        Figma →
                       </a>
                     ) : null}
                   </div>
