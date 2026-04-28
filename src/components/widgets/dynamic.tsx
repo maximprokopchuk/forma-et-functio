@@ -52,3 +52,11 @@ export const HierarchyReorder = dynamic(
     loading: () => <WidgetSkeleton label="Загрузка виджета…" />,
   },
 );
+
+export const BeforeAfterSlider = dynamic(
+  () => import("./before-after-slider").then((m) => m.BeforeAfterSlider),
+  {
+    ssr: false,
+    loading: () => <WidgetSkeleton label="Загрузка виджета…" />,
+  },
+);
