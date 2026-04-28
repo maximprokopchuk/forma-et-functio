@@ -31,6 +31,11 @@ type SubmissionApi = {
   feedback: string | null;
 };
 
+type RubricMeta = {
+  id: string;
+  dimensions: Array<{ id: string; label: string; weight: number }>;
+};
+
 type SubmissionFormProps = {
   lessonSlug: string;
   topicSlug: string;
@@ -41,6 +46,7 @@ type SubmissionFormProps = {
 export function SubmissionForm({
   lessonSlug,
   topicSlug,
+  rubricId,
   authed,
 }: SubmissionFormProps) {
   const [description, setDescription] = useState("");
@@ -49,8 +55,28 @@ export function SubmissionForm({
   const [status, setStatus] = useState<Status>("idle");
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<FeedbackJson | null>(null);
+  const [rubric, setRubric] = useState<RubricMeta | null>(null);
   const [error, setError] = useState<string | null>(null);
   const pollRef = useRef<number | null>(null);
+
+  // Load rubric metadata for criteria preview + label mapping in feedback.
+  useEffect(() => {
+    if (!rubricId) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(`/api/rubrics/${encodeURIComponent(rubricId)}`);
+        if (!res.ok) return;
+        const data = (await res.json()) as RubricMeta;
+        if (!cancelled) setRubric(data);
+      } catch {
+        // non-fatal — readout will fall back to dimension ids.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [rubricId]);
 
   const stopPolling = useCallback(() => {
     if (pollRef.current !== null) {
@@ -199,7 +225,7 @@ export function SubmissionForm({
   }
 
   if (status === "ready" && feedback) {
-    return <FeedbackReadout feedback={feedback} />;
+    return <FeedbackReadout feedback={feedback} rubric={rubric} />;
   }
 
   if (status === "failed") {
@@ -231,6 +257,10 @@ export function SubmissionForm({
       aria-label="Отправка работы на AI-проверку"
     >
       <p className="text-caption text-ink-muted">Работа на проверку</p>
+
+      {rubric && rubric.dimensions.length > 0 ? (
+        <CriteriaPreview rubric={rubric} />
+      ) : null}
 
       <label
         className="flex flex-col"
@@ -347,6 +377,63 @@ export function SubmissionForm({
   );
 }
 
+function CriteriaPreview({ rubric }: { rubric: RubricMeta }) {
+  // Sort by weight desc — same convention as FeedbackReadout.
+  const sorted = [...rubric.dimensions].sort((a, b) => b.weight - a.weight);
+  return (
+    <details
+      className="bg-paper"
+      style={{ border: "0.5px solid var(--rule)", padding: "12px 14px" }}
+    >
+      <summary
+        className="text-caption text-ink cursor-pointer motion-micro hover:text-cinnabar"
+        style={{ listStyle: "none" }}
+      >
+        Что оценивает AI · {sorted.length}{" "}
+        {sorted.length === 1
+          ? "измерение"
+          : sorted.length < 5
+            ? "измерения"
+            : "измерений"}{" "}
+        ↓
+      </summary>
+      <ul
+        className="flex flex-col"
+        style={{ gap: "6px", marginTop: "10px" }}
+      >
+        {sorted.map((d) => (
+          <li
+            key={d.id}
+            className="flex items-baseline"
+            style={{ gap: "12px" }}
+          >
+            <span
+              className="text-ink tabular-nums"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "13px",
+                minWidth: "40px",
+              }}
+            >
+              {Math.round(d.weight * 100)}%
+            </span>
+            <span
+              className="text-ink"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "15px",
+                lineHeight: "22px",
+              }}
+            >
+              {d.label}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
 function SpinnerRule() {
   return (
     <div
@@ -387,7 +474,26 @@ function SpinnerRule() {
   );
 }
 
-function FeedbackReadout({ feedback }: { feedback: FeedbackJson }) {
+function FeedbackReadout({
+  feedback,
+  rubric,
+}: {
+  feedback: FeedbackJson;
+  rubric: RubricMeta | null;
+}) {
+  // Order feedback dimensions by rubric weight desc so the heaviest criteria
+  // sit at the top. Falls back to the AI's order when rubric isn't loaded.
+  const labelFor = (id: string) =>
+    rubric?.dimensions.find((d) => d.id === id)?.label ?? id;
+  const weightFor = (id: string) =>
+    rubric?.dimensions.find((d) => d.id === id)?.weight ?? null;
+
+  const sorted = rubric
+    ? [...feedback.dimensions].sort(
+        (a, b) => (weightFor(b.id) ?? 0) - (weightFor(a.id) ?? 0),
+      )
+    : feedback.dimensions;
+
   return (
     <section
       aria-label="Фидбек"
@@ -426,35 +532,44 @@ function FeedbackReadout({ feedback }: { feedback: FeedbackJson }) {
       >
         <p className="text-caption text-ink-muted">По измерениям</p>
         <ul className="flex flex-col" style={{ gap: "10px" }}>
-          {feedback.dimensions.map((d) => (
-            <li
-              key={d.id}
-              className="flex"
-              style={{ gap: "16px", alignItems: "baseline" }}
-            >
-              <span
-                className="text-ink tabular-nums"
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "16px",
-                  minWidth: "32px",
-                }}
+          {sorted.map((d) => {
+            const weight = weightFor(d.id);
+            return (
+              <li
+                key={d.id}
+                className="flex"
+                style={{ gap: "16px", alignItems: "baseline" }}
               >
-                {d.score}/5
-              </span>
-              <span
-                className="text-ink"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "16px",
-                  lineHeight: "24px",
-                }}
-              >
-                <strong style={{ fontWeight: 600 }}>{d.id}.</strong>{" "}
-                <span className="text-ink-muted">{d.note}</span>
-              </span>
-            </li>
-          ))}
+                <span
+                  className="text-ink tabular-nums"
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "16px",
+                    minWidth: "32px",
+                  }}
+                >
+                  {d.score}/5
+                </span>
+                <span
+                  className="text-ink"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "16px",
+                    lineHeight: "24px",
+                  }}
+                >
+                  <strong style={{ fontWeight: 600 }}>{labelFor(d.id)}</strong>
+                  {weight != null ? (
+                    <span className="text-ink-muted tabular-nums">
+                      {" · "}
+                      {Math.round(weight * 100)}%
+                    </span>
+                  ) : null}
+                  <span className="text-ink-muted">{" — "}{d.note}</span>
+                </span>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
