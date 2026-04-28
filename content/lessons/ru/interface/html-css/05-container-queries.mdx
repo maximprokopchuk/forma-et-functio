@@ -1,0 +1,238 @@
+---
+title: "Container queries и logical properties"
+description: "Адаптация к контексту, а не к viewport. Logical properties для интернационализации. Современный CSS без media queries."
+order: 5
+estimated_minutes: 18
+blooms_level: L4
+requires:
+  - "interface/html-css/04-grid"
+  - "foundations/composition/02-grids-deep"
+exercise_types: ["knowledge_check"]
+---
+
+<DropCap>Д</DropCap>о 2023 года любая адаптация раскладки в вебе сводилась к одной координате — ширине окна браузера. Media queries (CSS3, 2009) научили компоненты реагировать на viewport, но не на собственный контейнер; всё, что не помещалось в эту модель, эмулировалось JS-ResizeObserver'ами или дублированием компонентов. Container queries и logical properties — два независимых, но родственных слома: первый даёт компоненту знание о его реальном окружении, второй отвязывает геометрию от физических осей экрана. Вместе они закрывают полтора десятилетия workaround'ов и делают компоненты по-настоящему переносимыми — между макетами, языками, режимами письма.
+
+<SectionBreak id="01" label="VIEWPORT QUERIES И ИХ ПОТОЛОК" />
+
+Media queries появились в CSS3 в 2009 году вместе с движением Responsive Web Design, которое Этан Маркотт сформулировал в одноимённой статье на A List Apart весной 2010-го. Конструкция `@media (min-width: 768px)` стала основой адаптивного веба: правила применяются, если viewport — окно браузера или область экрана устройства — удовлетворяет условию. К media queries добавились `orientation`, `prefers-color-scheme`, `prefers-reduced-motion`, `resolution`, `hover` — длинный список характеристик, описывающих среду, в которой работает страница.
+
+Все эти характеристики глобальны. Они описывают экран и пользовательские предпочтения, не место конкретного компонента в макете. Допущение работает, пока компонент знает, где он живёт: hero-блок занимает всю ширину viewport, его адаптация к viewport совпадает с задачей. Но переносимый компонент такого знания не имеет. Один и тот же `<Card>` может оказаться в полной ширине main column, в трёхколонной grid-ленте, в боковой панели шириной 280 px, в drawer'е модалки. Viewport ему ни о чём не сообщает: карточка в sidebar на 4K-мониторе сидит в тех же 280 пикселях, что на iPhone, — визуальный контекст идентичен, а media query видит две разные ширины окна.
+
+До container queries задача решалась тремя способами, и все три плохи. `ResizeObserver` в JavaScript: компонент измеряет себя, ставит data-атрибут, CSS реагирует на атрибут — добавляет JS в каждую карточку и ломается при SSR. Inline-стили: `style={{ width: containerWidth }}` с расчётом в React — смешивает stateful-логику с раскладкой. Дублирование: `<CardCompact>`, `<CardFull>`, и потребитель сам решает, какой импортировать — перекладывает работу на родителя.
+
+Каждый workaround прятал одну недосказанность спецификации: компонент не имел синтаксиса, чтобы сказать «реагирую на родителя». Container queries закрывают именно эту дыру.
+
+<MarginNote>
+Ethan Marcotte, *Responsive Web Design*, A List Apart, 25 мая 2010 — статья, давшая имя подходу, и впоследствии книга в серии A Book Apart (2011). Сформулировала триаду fluid grids + flexible images + media queries. Container queries — следующий шаг той же линии: от viewport-уровня к component-уровню.
+</MarginNote>
+
+<SectionBreak id="02" label="CONTAINER QUERIES СИНТАКСИС" />
+
+Спецификация — *CSS Containment Module Level 3* (W3C). Драфты с 2017 года; имплементация дозревала шесть лет. Chrome 105 — сентябрь 2022, Safari 16 — сентябрь 2022, Firefox 110 — февраль 2023. С весны 2023 фича стабильна во всех major-браузерах без полифиллов; к 2025 году входит в Web Baseline.
+
+Конструкция из двух частей. Сначала родителю объявляется containment-контекст: элемент сообщает браузеру, что согласен быть точкой отсчёта для дочерних query.
+
+```css
+.card-wrapper {
+  container-type: inline-size;
+  container-name: card;
+}
+```
+
+`container-type` принимает три значения. `inline-size` отслеживает только inline-размер (ширину в горизонтальной письменности); компонент реагирует на ширину родителя. `size` отслеживает обе оси, inline и block; разрешает query по высоте, но требует от родителя фиксированной block-size, иначе появляется циклическая зависимость «высота зависит от детей, дети — от высоты». `normal` — default, контейнер не отслеживается. На практике 95% случаев — `inline-size`.
+
+`container-name` — необязательное имя. Без него `@container`-правило относится к ближайшему containment-родителю; с именем — к родителю с указанным name. Имена позволяют пропускать промежуточные contain-контексты: компонент реагирует на `card-grid`, минуя оборачивающий `modal-body`.
+
+Дочерний компонент описывает поведение в зависимости от размера контейнера:
+
+```css
+.card {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@container card (min-width: 480px) {
+  .card {
+    grid-template-columns: 160px 1fr;
+    gap: 24px;
+  }
+}
+
+@container card (min-width: 720px) {
+  .card {
+    grid-template-columns: 200px 1fr 120px;
+  }
+}
+```
+
+При ширине родителя меньше 480 px карточка вертикальна. От 480 до 720 — двухколоночна с миниатюрой слева. Шире 720 — трёхколоночна с боковой панелью. Та же карточка в main column выглядит широко, в sidebar — компактно, в drawer — вертикально. Условие живёт в CSS, ровно там, где живёт раскладка.
+
+Синтаксис query совпадает с media queries: `min-width`, `max-width`, `min-inline-size`, range-syntax `(width >= 480px)`, операторы `and`, `or`, `not`. Разработчик, знакомый с media queries, читает container queries без переучивания.
+
+<SectionBreak id="03" label="CQ-ЕДИНИЦЫ" />
+
+Вместе с `@container`-правилом спецификация ввела шесть новых единиц длины. Они работают как `vw` / `vh` / `vmin` / `vmax`, но считаются от containment-родителя, а не от viewport.
+
+`cqw` — 1% inline-size containment-родителя. В горизонтальной письменности приблизительно `width`. На контейнере 600 px `1cqw = 6px`. `cqh` — 1% block-size; работает, только если родитель имеет `container-type: size`. `cqi` — 1% inline-size, logical-форма: при `writing-mode: vertical-rl` следует за inline-axis, которая теперь вертикальная. `cqb` — logical-эквивалент `cqh`. `cqmin` и `cqmax` — меньшее и большее из `cqi` и `cqb`. Та же пара, что `vw` против `vi`: physical против logical.
+
+Применение — главный практический сдвиг. До container queries fluid-typography строилась через `vw`: `font-size: clamp(1rem, 4vw, 2rem)` означало «кегль зависит от ширины окна». На карточке в sidebar на 4K-десктопе 4vw — это около 77 px, что для заголовка карточки шириной 280 px абсурдно. С `cqi` та же запись становится осмысленной:
+
+```css
+.card {
+  container-type: inline-size;
+}
+
+.card h3 {
+  font-size: clamp(1rem, 4cqi, 2rem);
+}
+```
+
+На карточке 280 px `4cqi = 11.2px`, clamp прижимает к нижней границе 1rem. На карточке 720 px `4cqi = 28.8px`, clamp прижимает к 2rem. В диапазоне между — плавная интерполяция. Заголовок «дышит» с компонентом; типографика становится свойством карточки, не свойством окна.
+
+Тот же приём работает для `padding`, `gap`, `border-radius`. `padding-inline: clamp(1rem, 5cqi, 2rem)` даёт отступы, пропорциональные ширине карточки. Смещение от token-based design (фиксированные шкалы) к contextual design (значения относительно компонента) — новый регистр, появившийся с CQ-единицами.
+
+<MarginNote>
+*CSS Containment Module Level 3* (W3C, drafts.csswg.org/css-contain-3) — нормативная спецификация container queries и CQ-единиц. Editor's Draft с 2020 года; стабильная имплементация — Chrome 105 (сентябрь 2022), Safari 16 (сентябрь 2022), Firefox 110 (февраль 2023). Оригинальный proposal — Miriam Suzanne, инициатива RFC-формата в 2020 году, итог восьми лет публичных обсуждений в CSS Working Group.
+</MarginNote>
+
+<SectionBreak id="04" label="STYLE QUERIES И HAS()" />
+
+Container queries по размеру — первая фаза спецификации. Вторая, формирующаяся параллельно, — style queries: `@container style(...)`-правило, реагирующее не на размер, а на CSS custom properties родителя. Конструкция выглядит так:
+
+```css
+.theme-block {
+  container-name: theme;
+  --mode: dark;
+}
+
+@container theme style(--mode: dark) {
+  .surface {
+    background: #111;
+    color: #f5f5f5;
+  }
+}
+```
+
+Дочерний `.surface` реагирует на значение `--mode` ближайшего named-container'а `theme`. Темизация без класса-модификатора, без data-атрибута, без переключателя в JS. Style queries имплементированы в Chrome 111 (март 2023), Safari 18 (сентябрь 2024), Firefox — за флагом на момент 2025 года; полное межбраузерное покрытие не достигнуто.
+
+Параллельный механизм context-aware-styling — псевдокласс `:has()`. Спецификация — *Selectors Level 4* (W3C); реализация — Safari 15.4 (март 2022), Chrome 105 (сентябрь 2022), Firefox 121 (декабрь 2023). `:has()` применяется к элементу, у которого есть совпадающий потомок.
+
+```css
+.card:has(img) {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+}
+
+.form:has(:invalid) .submit-btn {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+article:has(> figure) {
+  margin-block-end: 3rem;
+}
+```
+
+Карточка перестраивается в две колонки, только если внутри есть изображение. Кнопка submit становится визуально неактивной, если в форме есть невалидное поле — без `useState`, без обработчика `onChange`. Статья получает увеличенный нижний margin, если содержит figure-блок.
+
+`:has()` называют parent-селектором: впервые в истории CSS правило стилизует элемент в зависимости от того, что внутри него. До 2022 года эту логику можно было реализовать только в JavaScript. В сочетании с container queries `:has()` даёт два независимых измерения context-aware UI: «реагирую на свой размер» (CQ) и «реагирую на свою структуру» (`:has()`).
+
+<SectionBreak id="05" label="LOGICAL PROPERTIES" />
+
+Параллельно с container queries в CSS созревал второй сдвиг — отвязка геометрии от физических осей экрана. Старые свойства привязаны к экрану: `margin-top` — всегда сверху, `padding-left` — всегда слева, `border-right` — всегда справа. Это разумно, пока письменность горизонтальная и идёт слева направо. В арабском, иврите, фарси текст идёт справа налево; в традиционной японской и китайской типографике — сверху вниз с колонками справа налево. Физические свойства в этих режимах ломаются: `padding-left: 16px` в RTL-интерфейсе оставляет padding слева, но «начало текста» теперь справа — отступ оказывается в конце, а не в начале.
+
+Logical properties (CSS Logical Properties and Values Module Level 1, W3C) переписывают весь геометрический словарь в терминах block-axis и inline-axis. Block-axis — направление, в котором абзацы следуют друг за другом (сверху вниз в горизонтальной письменности, справа налево в традиционном японском). Inline-axis — направление, в котором текст течёт внутри строки (слева направо в LTR, справа налево в RTL, сверху вниз в vertical writing). Свойства получают пары `block-start` / `block-end` и `inline-start` / `inline-end`:
+
+| Physical | Logical |
+| --- | --- |
+| `margin-top` | `margin-block-start` |
+| `margin-bottom` | `margin-block-end` |
+| `margin-left` | `margin-inline-start` |
+| `margin-right` | `margin-inline-end` |
+| `padding-left` | `padding-inline-start` |
+| `border-right` | `border-inline-end` |
+| `top` / `left` | `inset-block-start` / `inset-inline-start` |
+| `width` | `inline-size` |
+| `height` | `block-size` |
+
+Сокращённые формы: `margin-block`, `margin-inline`, `padding-block`, `padding-inline`, `inset-block`, `inset-inline`. Практический выигрыш: `padding-inline: 24px` заменяет пару `padding-left: 24px; padding-right: 24px;` — короче, и сразу очевидно, что отступы симметричны.
+
+Поддержка стабильна с 2021: Safari 14.1, Firefox 66, Chrome 87. К 2025 году logical properties — стандарт; physical-форма работает, но воспринимается как legacy.
+
+```css
+.article {
+  margin-block-end: 2rem;
+  padding-inline: clamp(1rem, 5cqi, 2rem);
+  border-inline-start: 4px solid var(--accent);
+}
+
+.callout {
+  margin-block: 1.5rem 2rem;
+  padding-block: 1rem;
+  padding-inline: 1.25rem;
+  inline-size: min(100%, 60ch);
+}
+```
+
+В LTR-проекте такая запись визуально идентична physical-форме. В RTL — без правки CSS — `border-inline-start` оказывается справа, `padding-inline` остаётся симметричным. Один CSS, два направления. До logical properties RTL-локализация требовала плагина-«перевертыша» (rtlcss, postcss-rtl), и плагины ошибались на градиентах и `transform: translateX()`.
+
+Tailwind CSS с версии 3.3 (март 2023) добавил утилиты для logical properties: `ms-4`, `me-4`, `ps-4`, `pe-4`. Компонентные библиотеки 2024–2025 годов (shadcn/ui, Radix Themes, Park UI) пишут logical-формы в default-тэмплейтах.
+
+<MarginNote>
+*CSS Logical Properties and Values Level 1* (W3C, drafts.csswg.org/css-logical-1) — нормативная спецификация. Candidate Recommendation Snapshot с июля 2018; стабильная имплементация — Chrome 87, Firefox 66, Safari 14.1. Логика основана на абстрактных направлениях (start/end по block- и inline-axis), введённых ещё в CSS Writing Modes Level 3 для поддержки CJK-типографики.
+</MarginNote>
+
+Vertical writing modes — отдельный мотив. Японский и традиционный китайский набираются `writing-mode: vertical-rl`: текст идёт сверху вниз, колонки — справа налево. Block-axis становится горизонтальной осью, inline-axis — вертикальной. Physical-свойства теряют смысл: `margin-top` физически работает, но семантически описывает «отступ перед первым символом колонки», что не то, что обычно имелось в виду. Logical-форма `margin-block-start` остаётся «отступ перед первым абзацем» в любом режиме письменности.
+
+<SectionBreak id="06" label="МИГРАЦИЯ И ПОДДЕРЖКА" />
+
+Container queries и logical properties — обе фичи в Web Baseline 2023 (определение Baseline появилось в инициативе Web Platform Dashboard от Google, Mozilla и Microsoft). Обе работают во всех major-браузерах в актуальных версиях без полифиллов и префиксов. Поддержка проекта Chrome ≥ 105, Safari ≥ 16, Firefox ≥ 110 — обе фичи доступны без оговорок.
+
+Стратегия миграции для container queries — точечная, не массовая. Старые компоненты под media queries не нужно переписывать без причины: они работают. CQ вводятся в двух случаях. Первый — новый компонент, потенциально живущий в нескольких контекстах: карточка, инпут, модалка. Второй — существующий компонент с новой задачей жить в контексте, который media queries не покрывают. В обоих случаях изменение локально.
+
+Стратегия для logical properties зависит от roadmap. Если планируется RTL-локализация (арабский, иврит) — приоритет высокий, переписывать при касании компонента. LTR-only без планов на RTL — приоритет низкий, но правило: новый CSS пишется в logical-форме, существующий physical не трогается без необходимости. Постепенная конвергенция без отдельного refactoring-проекта.
+
+Полифилл container-query-polyfill от Google Chrome team (2021–2022) переведён в archive в 2023 — фича стабильна нативно. Для logical properties полифилла нет и не было: спецификация работает на уровне движка раскладки. IE11 не поддерживает ни ту, ни другую — но Microsoft закончил поддержку IE11 в июне 2022, и проекты, продолжающие его поддерживать, обсуждаются в отдельной плоскости.
+
+<SectionBreak id="07" label="СИНТЕЗ" />
+
+Цикл из пяти уроков HTML/CSS складывается в законченный современный CSS-стек.
+
+01 *Семантика* — материал, видимый assistive technologies и search engines. Структурный контракт между разметкой и потребителями.
+
+02 *Box model* — геометрия одного элемента: content, padding, border, margin; `box-sizing: border-box` как базовая гигиена.
+
+03 *Flexbox* — одномерное распределение: списки, navbar'ы, тулбары, элементы формы. Content-driven раскладки.
+
+04 *Grid* — двумерные раскладки: страницы, dashboards, карточные ленты, holy-grail layout. Layout-driven раскладки.
+
+05 *Container queries и logical properties* — адаптация к контексту и интернационализация. Компоненты, реагирующие на родителя, а не на окно. Геометрия, отвязанная от физических осей экрана.
+
+Этот стек закрывает порядка 95% layout-задач продуктового UI. То, что не закрывает: motion-design (анимации, переходы — отдельный трек), фичи в активной разработке — anchor positioning (Chrome 125 / 2024, Safari и Firefox подтягиваются), view transitions, CSS Nesting.
+
+Связь с уроком `composition/02-grids-deep` — прямая. Там сетка, container queries и subgrid обсуждались на уровне дизайн-контракта: 16 колонок, outer margin, sidenotes, точки излома. Здесь — на уровне CSS-механики: как `@container`-правило исполняется браузером, как CQ-единицы пересчитываются, как logical properties обходят геометрию RTL и vertical writing modes. Один и тот же материал в двух регистрах — design intent и implementation primitive.
+
+Container queries и logical properties — не косметические улучшения, а смена парадигмы. До 2023 года CSS требовал, чтобы компонент знал о макете больше, чем имел право знать: hardcoded про viewport, физические оси, направление письменности. Современный CSS снимает эти зависимости: компонент описывает себя как реакцию на контекст; макет навязывает контекст; ни одна сторона не знает деталей другой. Та же декомпозиция, что произошла в архитектуре фронтенда с переходом от страниц к компонентам — только теперь дошла до CSS.
+
+Дальше в треке interface — JavaScript, frameworks, accessibility-имплементация, design tokens. Layout как тема закрыта.
+
+<Quiz
+  question="В чём принципиальное отличие container queries от media queries при разработке переносимого компонента?"
+  options={[
+    { text: "Container queries быстрее работают, но дают тот же результат" },
+    { text: "Container queries реагируют на размер ближайшего containment-родителя, media queries — на размер viewport; одна и та же карточка в sidebar и main column на одном viewport может иметь разную раскладку без JS-логики и без дублирования компонента", correct: true },
+    { text: "Container queries — это синтаксический сахар над @media (min-width)" },
+    { text: "Media queries устарели и больше не работают в Safari 16+" }
+  ]}
+/>
+
+<Quiz
+  question="Зачем переходить с margin-left / padding-right на margin-inline-start / padding-inline-end, если проект LTR-only и не планирует RTL?"
+  options={[
+    { text: "Logical properties работают быстрее физических — браузер их оптимизирует" },
+    { text: "Не нужно — physical-форма для LTR-only проектов остаётся правильным выбором без оговорок" },
+    { text: "Logical properties делают CSS RTL-friendly из коробки на случай будущей локализации, корректно работают в vertical writing modes (CJK), и сокращённые формы padding-inline / margin-block заменяют пары физических свойств одной декларацией — выигрыш на читаемости даже без RTL", correct: true },
+    { text: "Это требование W3C, и physical-форма выдаёт warning в DevTools" }
+  ]}
+/>
