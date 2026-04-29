@@ -48,3 +48,6 @@ next-env.d.ts
 
 # fumadocs (generated)
 .source/
+
+# lighthouse ci output
+.lighthouseci/

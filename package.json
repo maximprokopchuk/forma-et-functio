@@ -20,7 +20,8 @@
     "make-admin": "tsx scripts/make-admin.ts",
     "test:e2e": "playwright test",
     "size": "size-limit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lhci": "lhci autorun"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.0",
@@ -56,6 +57,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.2",
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.59.1",
     "@size-limit/preset-app": "^12.1.0",
     "@tailwindcss/postcss": "^4",
