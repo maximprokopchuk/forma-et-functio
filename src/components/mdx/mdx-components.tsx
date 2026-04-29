@@ -12,6 +12,7 @@ import { TypePairingLab } from "@/components/widgets/type-pairing-lab";
 import { SpacingTuner } from "@/components/widgets/spacing-tuner";
 import { A11ySimulator } from "@/components/widgets/a11y-simulator";
 import { BeforeAfterSlider } from "@/components/widgets/before-after-slider";
+import { MotionCurveEditor } from "@/components/widgets/motion-curve-editor";
 
 /**
  * Component map exposed to MDX content.
@@ -38,6 +39,7 @@ export function mdxComponents(components: MDXComponents = {}): MDXComponents {
     SpacingTuner,
     A11ySimulator,
     BeforeAfterSlider,
+    MotionCurveEditor,
 
     // --- HTML element overrides (editorial typography):
     h1: ({ children, ...props }) => (

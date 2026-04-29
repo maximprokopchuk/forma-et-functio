@@ -60,3 +60,11 @@ export const BeforeAfterSlider = dynamic(
     loading: () => <WidgetSkeleton label="Загрузка виджета…" />,
   },
 );
+
+export const MotionCurveEditor = dynamic(
+  () => import("./motion-curve-editor").then((m) => m.MotionCurveEditor),
+  {
+    ssr: false,
+    loading: () => <WidgetSkeleton label="Загрузка виджета…" />,
+  },
+);

@@ -6,6 +6,7 @@ import {
   BeforeAfterSlider,
   ColorContrastSandbox,
   HierarchyReorder,
+  MotionCurveEditor,
   SpacingTuner,
   TypePairingLab,
 } from "@/components/widgets/dynamic";
@@ -145,6 +146,12 @@ export default function WidgetsShowcase() {
           <LazyMount>
             <Exercise title="Симулятор доступности">
               <A11ySimulator />
+            </Exercise>
+          </LazyMount>
+
+          <LazyMount>
+            <Exercise title="Редактор кривой движения">
+              <MotionCurveEditor />
             </Exercise>
           </LazyMount>
 
