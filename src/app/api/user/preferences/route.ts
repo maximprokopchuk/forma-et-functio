@@ -16,6 +16,7 @@ const prefsSchema = z.object({
   preferredLevel: z.enum(["L1", "L2", "L3", "L4", "L5"]).nullable().optional(),
   showAllLevels: z.boolean().optional(),
   name: z.string().trim().min(1).max(120).optional(),
+  emailDigests: z.boolean().optional(),
   // `goal` isn't persisted yet (no column); accepted and ignored until
   // schema gets a `goal` field.
   goal: z.string().trim().min(1).max(2000).optional(),
@@ -33,6 +34,7 @@ export async function GET() {
       preferredLevel: true,
       showAllLevels: true,
       name: true,
+      emailDigests: true,
       onboardingCompleted: true,
     },
   });
@@ -41,6 +43,7 @@ export async function GET() {
     preferredLevel: user?.preferredLevel ?? null,
     showAllLevels: user?.showAllLevels ?? false,
     name: user?.name ?? null,
+    emailDigests: user?.emailDigests ?? true,
     onboardingCompleted: user?.onboardingCompleted ?? false,
   });
 }
@@ -63,12 +66,20 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Некорректные данные" }, { status: 400 });
   }
 
-  const { preferredTrack, preferredLevel, showAllLevels, name } = parsed.data;
+  const { preferredTrack, preferredLevel, showAllLevels, name, emailDigests } =
+    parsed.data;
+
+  // Onboarding is only "completed" when the call carries an onboarding-shaped
+  // field. Settings-page calls (toggling emailDigests) must not flip the flag.
+  const setOnboarding =
+    preferredTrack !== undefined ||
+    preferredLevel !== undefined ||
+    showAllLevels !== undefined;
 
   await db.user.update({
     where: { id: session.user.id },
     data: {
-      onboardingCompleted: true,
+      ...(setOnboarding ? { onboardingCompleted: true } : {}),
       ...(preferredTrack !== undefined
         ? { preferredTrack: preferredTrack ?? null }
         : {}),
@@ -77,6 +88,7 @@ export async function PATCH(req: Request) {
         : {}),
       ...(showAllLevels !== undefined ? { showAllLevels } : {}),
       ...(name !== undefined ? { name } : {}),
+      ...(emailDigests !== undefined ? { emailDigests } : {}),
     },
   });
 

@@ -51,6 +51,7 @@ export async function sendStreakDigest({
       currentStreak: { gt: 0 },
       lastStreakDay: { gte: yesterday, lt: today },
       email: { not: "" },
+      emailDigests: true,
     },
     select: {
       id: true,
