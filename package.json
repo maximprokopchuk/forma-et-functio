@@ -22,7 +22,8 @@
     "test:e2e": "playwright test",
     "size": "size-limit",
     "typecheck": "tsc --noEmit",
-    "lhci": "lhci autorun"
+    "lhci": "lhci autorun",
+    "pa11y": "pa11y-ci"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.0",
@@ -72,6 +73,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "pa11y-ci": "^4.1.0",
     "size-limit": "^12.1.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",

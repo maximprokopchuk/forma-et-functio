@@ -1,0 +1,22 @@
+{
+  "defaults": {
+    "standard": "WCAG2AA",
+    "timeout": 30000,
+    "wait": 1500,
+    "concurrency": 1,
+    "chromeLaunchConfig": {
+      "args": ["--no-sandbox", "--disable-dev-shm-usage"]
+    },
+    "ignore": [
+      "warning",
+      "notice"
+    ]
+  },
+  "urls": [
+    "http://localhost:3000/",
+    "http://localhost:3000/lessons/foundations",
+    "http://localhost:3000/lessons/foundations/typography/01-anatomy",
+    "http://localhost:3000/widgets",
+    "http://localhost:3000/gallery"
+  ]
+}

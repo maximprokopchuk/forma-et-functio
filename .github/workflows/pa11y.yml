@@ -1,0 +1,66 @@
+name: Pa11y nightly
+
+on:
+  schedule:
+    # 03:00 UTC daily — 06:00 Moscow, 20:00 US Pacific previous day. Off-peak.
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: 20
+
+jobs:
+  pa11y:
+    name: Pa11y CI (WCAG2AA)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: forma
+          POSTGRES_PASSWORD: forma
+          POSTGRES_DB: forma_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: "postgresql://forma:forma@localhost:5432/forma_test"
+      NEXTAUTH_SECRET: "ci-pa11y-secret"
+      NEXTAUTH_URL: "http://localhost:3000"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply migrations
+        run: pnpm exec prisma migrate deploy
+      - name: Build
+        run: pnpm run build
+      - name: Start app
+        run: pnpm start &
+      - name: Wait for app
+        run: |
+          for i in {1..30}; do
+            curl -fsS http://localhost:3000/ > /dev/null && exit 0
+            sleep 2
+          done
+          echo "App did not start in time" && exit 1
+      - name: Pa11y CI
+        run: pnpm run pa11y
+      - name: Upload pa11y output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pa11y-output
+          path: |
+            pa11y-output/
+            pa11y-results.json
+          if-no-files-found: ignore
+          retention-days: 14
