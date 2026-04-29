@@ -241,14 +241,18 @@ model RubricDimension {
 // --- Review queue (spaced repetition) ---
 
 model ReviewQueue {
-  id        String   @id @default(cuid())
-  userId    String
-  topicSlug String
-  dueAt     DateTime
-  strength  Int      @default(0) // spaced-repetition strength
+  id         String   @id @default(cuid())
+  userId     String
+  topicSlug  String
+  // Denormalised so the /review page can build deep-links to the topic
+  // without a content-tree lookup per row.
+  lessonSlug String
+  dueAt      DateTime
+  strength   Int      @default(0) // spaced-repetition strength
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, topicSlug]) // upsert key on completion
   @@index([userId, dueAt])
   @@map("review_queue")
 }

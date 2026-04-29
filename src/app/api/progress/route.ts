@@ -218,6 +218,29 @@ export async function POST(req: Request) {
       };
     }
 
+    // Spaced-repetition: enqueue on first completion, leave alone on
+    // re-completion (the user has already seen the topic; the existing
+    // strength curve drives next-due). Initial dueAt = tomorrow UTC.
+    if (isNewCompletion) {
+      const tomorrow = new Date(today.getTime() + 24 * 60 * 60_000);
+      await tx.reviewQueue.upsert({
+        where: {
+          userId_topicSlug: {
+            userId: session.user.id,
+            topicSlug: body.topicSlug,
+          },
+        },
+        create: {
+          userId: session.user.id,
+          topicSlug: body.topicSlug,
+          lessonSlug: body.lessonSlug,
+          strength: 0,
+          dueAt: tomorrow,
+        },
+        update: {},
+      });
+    }
+
     return {
       progress: progressRow,
       streak,

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { LogoMark } from "./wordmark";
 import { ThemeToggle } from "./theme-toggle";
 import { StreakBadge } from "./streak-badge";
+import { ReviewBadge } from "./review-badge";
 
 /**
  * Editorial header — 72px paper band, logo left, sparse nav right.
@@ -64,6 +65,7 @@ export async function Header() {
                 Профиль
               </Link>
             ) : null}
+            {userId ? <ReviewBadge userId={userId} /> : null}
             {userId ? <StreakBadge userId={userId} /> : null}
             <ThemeToggle />
           </nav>
