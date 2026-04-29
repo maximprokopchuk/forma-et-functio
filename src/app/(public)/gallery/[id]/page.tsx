@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getAllTracks, getLesson, getTopic } from "@/lib/content";
 import { getRubric } from "@/lib/rubrics";
+import { LikeButton } from "@/components/submissions/like-button";
 import { TRACKS, type TrackSlug } from "@/lib/tracks";
 
 export const dynamic = "force-dynamic";
@@ -45,10 +48,12 @@ async function loadEntry(id: string) {
 
   return {
     id: row.id,
+    authorId: row.userId,
     userName: row.user?.name ?? "Без имени",
     description: row.description,
     figmaUrl: row.figmaUrl,
     imageUrl: row.imageUrl,
+    likesCount: row.likesCount,
     createdAt: row.createdAt,
     trackSlug,
     lessonSlug: row.lessonSlug,
@@ -98,9 +103,23 @@ export default async function GalleryEntryPage({
   const entry = await loadEntry(id);
   if (!entry) notFound();
 
+  const session = await getServerSession(authOptions);
+  const viewerId = session?.user?.id ?? null;
+  const authed = Boolean(viewerId);
+
   return (
     <article className="bg-paper">
-      <Hero entry={entry} />
+      <Hero
+        entry={entry}
+        likeButton={
+          <LikeButton
+            submissionId={entry.id}
+            initialCount={entry.likesCount}
+            authed={authed}
+            ownerView={viewerId === entry.authorId}
+          />
+        }
+      />
       {entry.imageUrl ? <ImageBand entry={entry} /> : null}
       <Body entry={entry} />
     </article>
@@ -140,7 +159,13 @@ function ImageBand({ entry }: { entry: Entry }) {
 
 type Entry = NonNullable<Awaited<ReturnType<typeof loadEntry>>>;
 
-function Hero({ entry }: { entry: Entry }) {
+function Hero({
+  entry,
+  likeButton,
+}: {
+  entry: Entry;
+  likeButton: React.ReactNode;
+}) {
   return (
     <section
       className="grid-16"
@@ -188,6 +213,9 @@ function Hero({ entry }: { entry: Entry }) {
             entry.topicTitle
           )}
         </p>
+        <div className="flex items-center" style={{ gap: "16px", marginTop: "8px" }}>
+          {likeButton}
+        </div>
       </div>
     </section>
   );

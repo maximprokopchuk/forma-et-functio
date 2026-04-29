@@ -1,7 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getAllTracks } from "@/lib/content";
+import { LikeButton } from "@/components/submissions/like-button";
 import { TRACK_SLUGS, TRACKS, type TrackSlug } from "@/lib/tracks";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +46,10 @@ export default async function GalleryPage({
     track && TRACK_SLUGS.includes(track as TrackSlug)
       ? (track as TrackSlug)
       : null;
+
+  const session = await getServerSession(authOptions);
+  const viewerId = session?.user?.id ?? null;
+  const authed = Boolean(viewerId);
 
   // --- Resolve each submission to its track by walking the content tree.
   //     Content is in-memory so this is cheap.
@@ -91,6 +98,7 @@ export default async function GalleryPage({
     }
     return {
       id: row.id,
+      authorId: row.userId,
       trackSlug: trackSlug ?? null,
       lessonSlug: row.lessonSlug,
       topicSlug: row.topicSlug,
@@ -99,6 +107,7 @@ export default async function GalleryPage({
       description: row.description,
       summary,
       overall,
+      likesCount: row.likesCount,
       userName: row.user?.name ?? "Без имени",
       createdAt: row.createdAt,
     };
@@ -261,6 +270,12 @@ export default async function GalleryPage({
                     </p>
                   ) : null}
                   <div className="flex items-center flex-wrap" style={{ gap: "16px" }}>
+                    <LikeButton
+                      submissionId={item.id}
+                      initialCount={item.likesCount}
+                      authed={authed}
+                      ownerView={viewerId === item.authorId}
+                    />
                     {item.overall !== null ? (
                       <p className="text-caption text-ink-muted tabular-nums">
                         Оценка · <span className="text-ink">{item.overall}</span>/5
