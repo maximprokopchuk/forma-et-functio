@@ -367,10 +367,10 @@ export function SubmissionForm({
           {status === "submitting" ? "Отправка…" : "Отправить на проверку →"}
         </button>
         <Link
-          href="/gallery"
+          href={`/gallery?topic=${encodeURIComponent(topicSlug)}`}
           className="text-caption text-ink-muted motion-micro hover:text-cinnabar"
         >
-          Посмотреть чужие работы ↗
+          Посмотреть чужие работы по этой теме ↗
         </Link>
       </div>
     </form>

@@ -30,22 +30,35 @@ export const metadata: Metadata = {
   },
 };
 
+const PAGE_SIZE = 24;
+const SLUG_RE = /^[a-z0-9-]+$/;
+type Sort = "recent" | "popular";
+
 /**
  * Public submissions gallery — plan §6.
  * List of opt-in public submissions with AI feedback summary.
- * CSS-columns masonry (no library). Filters by track, client-side via
- * query params (no re-fetching of auth state).
+ * CSS-columns masonry (no library). Server-rendered filter / sort / paginate
+ * via query params — no client state, deep-linkable.
  */
 export default async function GalleryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ track?: string }>;
+  searchParams: Promise<{
+    track?: string;
+    topic?: string;
+    sort?: string;
+    page?: string;
+  }>;
 }) {
-  const { track } = await searchParams;
+  const sp = await searchParams;
   const trackFilter: TrackSlug | null =
-    track && TRACK_SLUGS.includes(track as TrackSlug)
-      ? (track as TrackSlug)
+    sp.track && TRACK_SLUGS.includes(sp.track as TrackSlug)
+      ? (sp.track as TrackSlug)
       : null;
+  const topicFilter =
+    sp.topic && SLUG_RE.test(sp.topic) ? sp.topic : null;
+  const sort: Sort = sp.sort === "popular" ? "popular" : "recent";
+  const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
 
   const session = await getServerSession(authOptions);
   const viewerId = session?.user?.id ?? null;
@@ -55,6 +68,9 @@ export default async function GalleryPage({
   //     Content is in-memory so this is cheap.
   const topicToTrack = buildTopicToTrack();
 
+  // Topic + track interact: a topic slug isn't unique across the project,
+  // so when a track is set we restrict to lessons within it; without a
+  // track we just match the topic slug everywhere it appears.
   const whereTrack =
     trackFilter === null
       ? {}
@@ -63,21 +79,35 @@ export default async function GalleryPage({
             in: lessonsForTrack(trackFilter),
           },
         };
+  const whereTopic = topicFilter ? { topicSlug: topicFilter } : {};
 
-  const rows = await db.submission.findMany({
-    where: {
-      isPublic: true,
-      status: "FEEDBACK_READY",
-      ...whereTrack,
-    },
-    orderBy: { createdAt: "desc" },
-    take: 60,
-    include: {
-      user: {
-        select: { name: true },
+  const baseWhere = {
+    isPublic: true,
+    status: "FEEDBACK_READY" as const,
+    ...whereTrack,
+    ...whereTopic,
+  };
+
+  const [total, rows] = await Promise.all([
+    db.submission.count({ where: baseWhere }),
+    db.submission.findMany({
+      where: baseWhere,
+      orderBy:
+        sort === "popular"
+          ? [{ likesCount: "desc" }, { createdAt: "desc" }]
+          : { createdAt: "desc" },
+      take: PAGE_SIZE,
+      skip: (page - 1) * PAGE_SIZE,
+      include: {
+        user: {
+          select: { name: true },
+        },
       },
-    },
-  });
+    }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const topicTitle = topicFilter ? resolveTopicTitle(topicFilter) : null;
 
   const items = rows.map((row) => {
     const trackSlug = topicToTrack.get(`${row.lessonSlug}/${row.topicSlug}`);
@@ -146,21 +176,89 @@ export default async function GalleryPage({
           borderBlock: "0.5px solid var(--rule)",
         }}
       >
-        <nav
-          className="col-span-full xl:col-span-10 xl:col-start-3 flex items-center flex-wrap"
-          style={{ gap: "20px" }}
-          aria-label="Фильтр по треку"
+        <div
+          className="col-span-full xl:col-span-10 xl:col-start-3 flex flex-col"
+          style={{ gap: "16px" }}
         >
-          <FilterLink href="/gallery" label="Все треки" active={trackFilter === null} />
-          {TRACK_SLUGS.map((slug) => (
+          <nav
+            className="flex items-center flex-wrap"
+            style={{ gap: "20px" }}
+            aria-label="Фильтр по треку"
+          >
             <FilterLink
-              key={slug}
-              href={`/gallery?track=${slug}`}
-              label={TRACKS[slug].title}
-              active={trackFilter === slug}
+              href={buildQuery(
+                { track: trackFilter, topic: topicFilter, sort, page },
+                { track: null, page: 1 },
+              )}
+              label="Все треки"
+              active={trackFilter === null}
             />
-          ))}
-        </nav>
+            {TRACK_SLUGS.map((slug) => (
+              <FilterLink
+                key={slug}
+                href={buildQuery(
+                  { track: trackFilter, topic: topicFilter, sort, page },
+                  { track: slug, page: 1 },
+                )}
+                label={TRACKS[slug].title}
+                active={trackFilter === slug}
+              />
+            ))}
+          </nav>
+
+          <div
+            className="flex items-center flex-wrap"
+            style={{ gap: "16px" }}
+          >
+            {topicFilter ? (
+              <span
+                className="inline-flex items-center text-caption text-ink"
+                style={{
+                  gap: "8px",
+                  border: "0.5px solid var(--cinnabar)",
+                  padding: "4px 10px",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Тема · {topicTitle ?? topicFilter}
+                <Link
+                  href={buildQuery(
+                    { track: trackFilter, topic: topicFilter, sort, page },
+                    { topic: null, page: 1 },
+                  )}
+                  aria-label="Убрать фильтр по теме"
+                  className="text-cinnabar motion-micro hover:text-ink"
+                >
+                  ×
+                </Link>
+              </span>
+            ) : null}
+
+            <span
+              className="inline-flex items-center text-caption text-ink-muted"
+              style={{ gap: "12px", marginLeft: "auto" }}
+              aria-label="Сортировка"
+            >
+              <SortLink
+                href={buildQuery(
+                  { track: trackFilter, topic: topicFilter, sort, page },
+                  { sort: "recent", page: 1 },
+                )}
+                label="Свежие"
+                active={sort === "recent"}
+              />
+              <span aria-hidden>·</span>
+              <SortLink
+                href={buildQuery(
+                  { track: trackFilter, topic: topicFilter, sort, page },
+                  { sort: "popular", page: 1 },
+                )}
+                label="Популярные"
+                active={sort === "popular"}
+              />
+            </span>
+          </div>
+        </div>
       </section>
 
       <section
@@ -195,6 +293,7 @@ export default async function GalleryPage({
               </Link>
             </div>
           ) : (
+            <>
             <ul
               style={{
                 columnCount: 2,
@@ -301,6 +400,17 @@ export default async function GalleryPage({
                 </li>
               ))}
             </ul>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              build={(p) =>
+                buildQuery(
+                  { track: trackFilter, topic: topicFilter, sort, page },
+                  { page: p },
+                )
+              }
+            />
+            </>
           )}
         </div>
       </section>
@@ -333,6 +443,80 @@ function FilterLink({
   );
 }
 
+function SortLink({
+  href,
+  label,
+  active,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className="text-caption motion-micro"
+      style={{
+        color: active ? "var(--ink)" : "var(--ink-muted, #5C5752)",
+        letterSpacing: "0.05em",
+      }}
+      aria-current={active ? "page" : undefined}
+    >
+      {label}
+    </Link>
+  );
+}
+
+function Pagination({
+  page,
+  totalPages,
+  build,
+}: {
+  page: number;
+  totalPages: number;
+  build: (p: number) => string;
+}) {
+  if (totalPages <= 1) return null;
+  return (
+    <nav
+      aria-label="Пагинация"
+      className="flex items-center justify-between"
+      style={{
+        gap: "16px",
+        marginTop: "48px",
+        paddingTop: "24px",
+        borderTop: "0.5px solid var(--rule)",
+      }}
+    >
+      {page > 1 ? (
+        <Link
+          href={build(page - 1)}
+          className="text-caption text-ink motion-micro hover:text-cinnabar"
+          style={{ letterSpacing: "0.05em" }}
+        >
+          ← Предыдущая
+        </Link>
+      ) : (
+        <span aria-hidden style={{ visibility: "hidden" }}>placeholder</span>
+      )}
+      <span className="text-caption text-ink-muted tabular-nums">
+        Страница <span className="text-ink">{page}</span> из {totalPages}
+      </span>
+      {page < totalPages ? (
+        <Link
+          href={build(page + 1)}
+          className="text-caption text-ink motion-micro hover:text-cinnabar"
+          style={{ letterSpacing: "0.05em" }}
+        >
+          Следующая →
+        </Link>
+      ) : (
+        <span aria-hidden style={{ visibility: "hidden" }}>placeholder</span>
+      )}
+    </nav>
+  );
+}
+
 function buildTopicToTrack(): Map<string, TrackSlug> {
   const map = new Map<string, TrackSlug>();
   for (const t of getAllTracks()) {
@@ -352,4 +536,37 @@ function lessonsForTrack(track: TrackSlug): string[] {
     for (const l of t.lessons) lessons.push(l.slug);
   }
   return lessons;
+}
+
+function resolveTopicTitle(topicSlug: string): string | null {
+  for (const t of getAllTracks()) {
+    for (const l of t.lessons) {
+      const topic = l.topics.find((tp) => tp.slug === topicSlug);
+      if (topic) return topic.title;
+    }
+  }
+  return null;
+}
+
+/**
+ * Build a query string preserving filters but allowing per-call override.
+ * Empty values are dropped so URLs stay tidy.
+ */
+function buildQuery(
+  base: { track: TrackSlug | null; topic: string | null; sort: Sort; page: number },
+  override: Partial<{
+    track: TrackSlug | null;
+    topic: string | null;
+    sort: Sort;
+    page: number;
+  }>,
+): string {
+  const merged = { ...base, ...override };
+  const params = new URLSearchParams();
+  if (merged.track) params.set("track", merged.track);
+  if (merged.topic) params.set("topic", merged.topic);
+  if (merged.sort !== "recent") params.set("sort", merged.sort);
+  if (merged.page > 1) params.set("page", String(merged.page));
+  const qs = params.toString();
+  return qs ? `/gallery?${qs}` : "/gallery";
 }
