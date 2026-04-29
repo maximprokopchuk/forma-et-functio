@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">
+  <!-- paper background ~60% area -->
+  <rect width="1200" height="900" fill="#F4F1EA"/>
+
+  <!-- eyebrow -->
+  <text x="120" y="120" font-family="Inter, sans-serif" font-size="13" font-weight="500"
+        letter-spacing="2" fill="#5C5752">
+    ЦВЕТ И КОНТРАСТ  ·  МАТЕРИАЛ № 18
+  </text>
+
+  <!-- hairline -->
+  <line x1="120" y1="140" x2="860" y2="140" stroke="#C8C3B8" stroke-width="0.5"/>
+
+  <!-- H1 -->
+  <text x="120" y="220" font-family="Georgia, serif" font-size="56" font-weight="400"
+        fill="#14110F" letter-spacing="-1">
+    Палитра для финтех-приложения
+  </text>
+
+  <!-- Lead paragraph in ink -->
+  <text x="120" y="290" font-family="Georgia, serif" font-size="19" fill="#14110F">
+    <tspan x="120" dy="0">Сдержанная палитра на тёплом нейтральном фоне. Один акцентный</tspan>
+    <tspan x="120" dy="28">цвет работает только на главном действии — он не растекается</tspan>
+    <tspan x="120" dy="28">по интерфейсу и потому остаётся заметным.</tspan>
+  </text>
+
+  <!-- Body paragraphs -->
+  <text x="120" y="420" font-family="Georgia, serif" font-size="17" fill="#14110F">
+    <tspan x="120" dy="0">Основной текст набран чернилом #14110F на бумаге #F4F1EA — пара</tspan>
+    <tspan x="120" dy="28">даёт APCA Lc 87, выше порога для длинного чтения. Все вторичные</tspan>
+    <tspan x="120" dy="28">подписи держатся в ink-muted #5C5752 и проходят порог Lc 60.</tspan>
+  </text>
+
+  <text x="120" y="540" font-family="Georgia, serif" font-size="17" fill="#14110F">
+    <tspan x="120" dy="0">Семантические состояния различаются в первую очередь словом</tspan>
+    <tspan x="120" dy="28">и формой иконки, а не одним лишь оттенком — это требование</tspan>
+    <tspan x="120" dy="28">для пользователей с дальтонизмом.</tspan>
+  </text>
+
+  <!-- Status badge (ink-muted, semantic via word) -->
+  <rect x="120" y="640" width="170" height="32" fill="none" stroke="#C8C3B8" stroke-width="0.5"/>
+  <circle cx="138" cy="656" r="4" fill="#5C5752"/>
+  <text x="152" y="660" font-family="Inter, sans-serif" font-size="13" fill="#5C5752">
+    Платёж успешно проведён
+  </text>
+
+  <!-- Primary CTA — cinnabar, ~5% area -->
+  <rect x="120" y="700" width="200" height="48" fill="#D8412F"/>
+  <text x="220" y="730" font-family="Inter, sans-serif" font-size="13" font-weight="600"
+        letter-spacing="2" fill="#F4F1EA" text-anchor="middle">
+    ОТКРЫТЬ СЧЁТ
+  </text>
+
+  <!-- Secondary action — outlined, ink, no cinnabar -->
+  <rect x="340" y="700" width="200" height="48" fill="none" stroke="#14110F" stroke-width="1"/>
+  <text x="440" y="730" font-family="Inter, sans-serif" font-size="13" font-weight="600"
+        letter-spacing="2" fill="#14110F" text-anchor="middle">
+    УЗНАТЬ ПОДРОБНЕЕ
+  </text>
+
+  <!-- Margin: APCA calibration plate -->
+  <line x1="900" y1="200" x2="900" y2="720" stroke="#C8C3B8" stroke-width="0.5"/>
+
+  <text x="920" y="220" font-family="Inter, sans-serif" font-size="11" letter-spacing="2"
+        fill="#5C5752">КАЛИБРОВКА · APCA Lc</text>
+
+  <!-- swatch 1: paper / ink -->
+  <rect x="920" y="240" width="64" height="64" fill="#F4F1EA" stroke="#C8C3B8" stroke-width="0.5"/>
+  <text x="952" y="278" font-family="Georgia, serif" font-size="22" fill="#14110F"
+        text-anchor="middle">Aa</text>
+  <text x="1000" y="262" font-family="Inter, sans-serif" font-size="12" fill="#14110F">paper / ink</text>
+  <text x="1000" y="282" font-family="Inter, sans-serif" font-size="12" fill="#5C5752">Lc 87</text>
+
+  <!-- swatch 2: paper / cinnabar -->
+  <rect x="920" y="320" width="64" height="64" fill="#F4F1EA" stroke="#C8C3B8" stroke-width="0.5"/>
+  <text x="952" y="358" font-family="Georgia, serif" font-size="22" fill="#D8412F"
+        text-anchor="middle">Aa</text>
+  <text x="1000" y="342" font-family="Inter, sans-serif" font-size="12" fill="#14110F">paper / cinnabar</text>
+  <text x="1000" y="362" font-family="Inter, sans-serif" font-size="12" fill="#5C5752">Lc 78</text>
+
+  <!-- swatch 3: ink / paper -->
+  <rect x="920" y="400" width="64" height="64" fill="#14110F"/>
+  <text x="952" y="438" font-family="Georgia, serif" font-size="22" fill="#F4F1EA"
+        text-anchor="middle">Aa</text>
+  <text x="1000" y="422" font-family="Inter, sans-serif" font-size="12" fill="#14110F">ink / paper</text>
+  <text x="1000" y="442" font-family="Inter, sans-serif" font-size="12" fill="#5C5752">Lc 87</text>
+
+  <!-- swatch 4: paper / ink-muted -->
+  <rect x="920" y="480" width="64" height="64" fill="#F4F1EA" stroke="#C8C3B8" stroke-width="0.5"/>
+  <text x="952" y="518" font-family="Georgia, serif" font-size="22" fill="#5C5752"
+        text-anchor="middle">Aa</text>
+  <text x="1000" y="502" font-family="Inter, sans-serif" font-size="12" fill="#14110F">paper / ink-muted</text>
+  <text x="1000" y="522" font-family="Inter, sans-serif" font-size="12" fill="#5C5752">Lc 60</text>
+
+  <!-- footer hairline + folio -->
+  <line x1="120" y1="830" x2="1080" y2="830" stroke="#C8C3B8" stroke-width="0.5"/>
+  <text x="120" y="855" font-family="Inter, sans-serif" font-size="11" letter-spacing="1.5"
+        fill="#5C5752">FORMA ET FUNCTIO</text>
+  <text x="1080" y="855" font-family="Inter, sans-serif" font-size="11" fill="#5C5752"
+        text-anchor="end">18 / 84</text>
+</svg>

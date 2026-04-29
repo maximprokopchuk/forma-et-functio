@@ -105,8 +105,36 @@ function buildMultimodalMessages(
     description: string;
     figmaUrl: string | null;
     imageUrl: string;
+    /** Origin used to absolutise relative reference-example URLs. */
+    origin: string;
   },
 ): ModelMessage[] {
+  // Reference examples land first as a sequence of [text-label, image]
+  // pairs sorted by score. The model needs the image *adjacent* to the
+  // score declaration so the few-shot grounding is unambiguous.
+  const refParts: Array<
+    { type: "text"; text: string } | { type: "image"; image: URL }
+  > = [];
+  const refs = (rubric.reference_examples ?? [])
+    .filter((ex) => ex.url)
+    .sort((a, b) => a.score - b.score);
+  if (refs.length > 0) {
+    refParts.push({
+      type: "text",
+      text: "ЭТАЛОННЫЕ ПРИМЕРЫ ОЦЕНОК (сначала текст, затем картинка):",
+    });
+    for (const ex of refs) {
+      refParts.push({
+        type: "text",
+        text: `[Score ${ex.score}/5] ${ex.notes}`,
+      });
+      const url = ex.url.startsWith("http")
+        ? ex.url
+        : `${submission.origin.replace(/\/$/, "")}${ex.url}`;
+      refParts.push({ type: "image", image: new URL(url) });
+    }
+  }
+
   const text = [
     rubricSummary(rubric),
     "",
@@ -115,7 +143,7 @@ function buildMultimodalMessages(
     submission.figmaUrl
       ? `- Figma: ${submission.figmaUrl}`
       : "- Figma: не приложен",
-    "- Скриншот: приложен ниже. Это первоисточник — оценивай по нему.",
+    "- Скриншот: приложен ниже. Сравнивай его с эталонами и оценивай по rubric.",
     "",
     RESPONSE_SHAPE,
   ].join("\n");
@@ -128,6 +156,7 @@ function buildMultimodalMessages(
     {
       role: "user",
       content: [
+        ...refParts,
         { type: "text", text },
         { type: "image", image: new URL(submission.imageUrl) },
       ],
@@ -187,10 +216,18 @@ export async function generateFeedback(submissionId: string): Promise<void> {
       feedback = mockFeedback(rubric.dimensions.map((d) => ({ id: d.id })));
       tokens = 0;
     } else if (submission.imageUrl) {
+      // Resolve origin for absolute reference-example URLs. Falls back to a
+      // localhost dev URL — the AI provider will fail to fetch, ref-grounding
+      // is degraded, but the submission still gets graded by description +
+      // student image alone.
+      const origin =
+        process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+        "http://localhost:3000";
       const messages = buildMultimodalMessages(rubric, {
         description: submission.description,
         figmaUrl: submission.figmaUrl,
         imageUrl: submission.imageUrl,
+        origin,
       });
       const result = await generateObject({
         model: ai.model(MODEL_FEEDBACK),

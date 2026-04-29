@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">
+  <!-- paper background -->
+  <rect width="1200" height="900" fill="#F4F1EA"/>
+
+  <!-- eyebrow smallcaps -->
+  <text x="160" y="140" font-family="Inter, sans-serif" font-size="13" font-weight="500"
+        letter-spacing="2" fill="#5C5752">
+    ТИПОГРАФИКА  ·  МАТЕРИАЛ № 12
+  </text>
+
+  <!-- hairline -->
+  <line x1="160" y1="160" x2="900" y2="160" stroke="#C8C3B8" stroke-width="0.5"/>
+
+  <!-- H1 — слегка уменьшен -->
+  <text x="160" y="230" font-family="Georgia, serif" font-size="60" font-weight="400"
+        fill="#14110F" letter-spacing="-1">
+    Анатомия читаемой статьи
+  </text>
+
+  <!-- H2 — ПРОБЛЕМА: почти такой же размер как H1 (50 vs 60), должен был быть 36 -->
+  <text x="160" y="300" font-family="Georgia, serif" font-size="50" font-weight="400"
+        fill="#14110F" letter-spacing="-0.5">
+    Подзаголовок раздела
+  </text>
+
+  <!-- Lead paragraph -->
+  <text x="160" y="372" font-family="Georgia, serif" font-size="19" fill="#14110F">
+    <tspan x="160" dy="0">Читаемость рождается из дисциплины ритма: одна гарнитура для основного</tspan>
+    <tspan x="160" dy="28">текста, разумная длина строки и спокойная иерархия размеров.</tspan>
+  </text>
+
+  <!-- Body paragraph -->
+  <text x="160" y="468" font-family="Georgia, serif" font-size="17" fill="#14110F">
+    <tspan x="160" dy="0">Точка отсчёта в редакторской вёрстке — модульная сетка</tspan>
+    <tspan x="160" dy="28">с 8-пиксельным baseline. Каждый элемент кратен этому шагу:</tspan>
+    <tspan x="160" dy="28">высота строки, отступы между блоками, расстояние до иллюстраций.</tspan>
+    <tspan x="160" dy="28">Глаз не замечает сетку напрямую, но чувствует её отсутствие как</tspan>
+    <tspan x="160" dy="28">шум — текст «дребезжит», и читатель устаёт быстрее обычного.</tspan>
+  </text>
+
+  <!-- second body block -->
+  <text x="160" y="660" font-family="Georgia, serif" font-size="17" fill="#14110F">
+    <tspan x="160" dy="0">Заголовки мы делаем заметно крупнее и жирнее тела — между уровнями</tspan>
+    <tspan x="160" dy="28">должна быть пауза, ощутимая на расстоянии вытянутой руки.</tspan>
+  </text>
+
+  <!-- CTA -->
+  <rect x="160" y="740" width="220" height="44" fill="#D8412F"/>
+  <text x="270" y="767" font-family="Inter, sans-serif" font-size="13" font-weight="600"
+        letter-spacing="2" fill="#F4F1EA" text-anchor="middle">
+    ПРОДОЛЖИТЬ ЧТЕНИЕ
+  </text>
+
+  <!-- Margin note flagging the problem -->
+  <line x1="940" y1="270" x2="980" y2="270" stroke="#C8C3B8" stroke-width="0.5"/>
+  <text x="990" y="266" font-family="Georgia, serif" font-style="italic" font-size="13" fill="#5C5752">
+    <tspan x="990" dy="0">H1 и H2 почти</tspan>
+    <tspan x="990" dy="18">одного размера —</tspan>
+    <tspan x="990" dy="18">глаз спотыкается</tspan>
+    <tspan x="990" dy="18">на выборе.</tspan>
+  </text>
+
+  <!-- footer hairline + folio -->
+  <line x1="160" y1="830" x2="1040" y2="830" stroke="#C8C3B8" stroke-width="0.5"/>
+  <text x="160" y="855" font-family="Inter, sans-serif" font-size="11" letter-spacing="1.5"
+        fill="#5C5752">FORMA ET FUNCTIO</text>
+  <text x="1040" y="855" font-family="Inter, sans-serif" font-size="11" fill="#5C5752"
+        text-anchor="end">12 / 84</text>
+</svg>

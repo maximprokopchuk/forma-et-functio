@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">
+  <!-- paper background -->
+  <rect width="1200" height="900" fill="#F4F1EA"/>
+
+  <!-- eyebrow -->
+  <text x="120" y="120" font-family="Inter, sans-serif" font-size="13" font-weight="500"
+        letter-spacing="2" fill="#5C5752">
+    ЦВЕТ И КОНТРАСТ  ·  МАТЕРИАЛ № 18
+  </text>
+
+  <!-- hairline -->
+  <line x1="120" y1="140" x2="860" y2="140" stroke="#C8C3B8" stroke-width="0.5"/>
+
+  <!-- H1 -->
+  <text x="120" y="220" font-family="Georgia, serif" font-size="56" font-weight="400"
+        fill="#14110F" letter-spacing="-1">
+    Палитра для финтех-приложения
+  </text>
+
+  <!-- Lead paragraph -->
+  <text x="120" y="290" font-family="Georgia, serif" font-size="19" fill="#14110F">
+    <tspan x="120" dy="0">Сдержанная палитра на тёплом нейтральном фоне. Один акцент</tspan>
+    <tspan x="120" dy="28">работает на главном действии — это считается с дороги.</tspan>
+  </text>
+
+  <!-- Body — основной текст ОК -->
+  <text x="120" y="380" font-family="Georgia, serif" font-size="17" fill="#14110F">
+    <tspan x="120" dy="0">Основной текст набран чернилом #14110F на бумаге #F4F1EA.</tspan>
+    <tspan x="120" dy="28">Пара уверенно проходит APCA Lc 87 — этого достаточно для длинного</tspan>
+    <tspan x="120" dy="28">чтения.</tspan>
+  </text>
+
+  <!-- Secondary text — ПРОБЛЕМА: слишком светлый, Lc около 55 -->
+  <text x="120" y="500" font-family="Georgia, serif" font-size="15" fill="#B5B0A8">
+    <tspan x="120" dy="0">Подписи и метаданные мы делаем чуть светлее основного — но эта</tspan>
+    <tspan x="120" dy="24">конкретная пара уже балансирует на грани читаемости и быстро</tspan>
+    <tspan x="120" dy="24">проваливается на солнце или дешёвом мониторе.</tspan>
+  </text>
+
+  <!-- Status row — ПРОБЛЕМА: error-цвет почти как brand cinnabar -->
+  <!-- Error badge: #E84030 — почти неотличим от cinnabar #D8412F -->
+  <rect x="120" y="610" width="200" height="36" fill="#E84030"/>
+  <text x="220" y="634" font-family="Inter, sans-serif" font-size="13" font-weight="600"
+        fill="#F4F1EA" text-anchor="middle">Ошибка платежа</text>
+
+  <!-- Primary CTA — cinnabar -->
+  <rect x="340" y="610" width="200" height="36" fill="#D8412F"/>
+  <text x="440" y="634" font-family="Inter, sans-serif" font-size="13" font-weight="600"
+        fill="#F4F1EA" text-anchor="middle">Открыть счёт</text>
+
+  <!-- Margin note flagging issues -->
+  <line x1="900" y1="500" x2="940" y2="500" stroke="#C8C3B8" stroke-width="0.5"/>
+  <text x="950" y="496" font-family="Georgia, serif" font-style="italic" font-size="13" fill="#5C5752">
+    <tspan x="950" dy="0">Secondary-текст</tspan>
+    <tspan x="950" dy="18">Lc ≈ 55 — на грани.</tspan>
+  </text>
+
+  <line x1="900" y1="624" x2="940" y2="624" stroke="#C8C3B8" stroke-width="0.5"/>
+  <text x="950" y="620" font-family="Georgia, serif" font-style="italic" font-size="13" fill="#5C5752">
+    <tspan x="950" dy="0">Brand и error</tspan>
+    <tspan x="950" dy="18">визуально слиплись.</tspan>
+  </text>
+
+  <!-- Calibration plate (less complete than 5) -->
+  <line x1="900" y1="180" x2="900" y2="440" stroke="#C8C3B8" stroke-width="0.5"/>
+  <text x="920" y="200" font-family="Inter, sans-serif" font-size="11" letter-spacing="2"
+        fill="#5C5752">КАЛИБРОВКА</text>
+
+  <rect x="920" y="220" width="56" height="56" fill="#F4F1EA" stroke="#C8C3B8" stroke-width="0.5"/>
+  <text x="948" y="254" font-family="Georgia, serif" font-size="20" fill="#14110F"
+        text-anchor="middle">Aa</text>
+  <text x="990" y="252" font-family="Inter, sans-serif" font-size="11" fill="#5C5752">Lc 87</text>
+
+  <rect x="920" y="290" width="56" height="56" fill="#F4F1EA" stroke="#C8C3B8" stroke-width="0.5"/>
+  <text x="948" y="324" font-family="Georgia, serif" font-size="20" fill="#B5B0A8"
+        text-anchor="middle">Aa</text>
+  <text x="990" y="322" font-family="Inter, sans-serif" font-size="11" fill="#5C5752">Lc 55</text>
+
+  <rect x="920" y="360" width="56" height="56" fill="#D8412F"/>
+  <rect x="976" y="360" width="56" height="56" fill="#E84030"/>
+  <text x="1042" y="392" font-family="Inter, sans-serif" font-size="11" fill="#5C5752">brand≈error</text>
+
+  <!-- footer hairline + folio -->
+  <line x1="120" y1="830" x2="1080" y2="830" stroke="#C8C3B8" stroke-width="0.5"/>
+  <text x="120" y="855" font-family="Inter, sans-serif" font-size="11" letter-spacing="1.5"
+        fill="#5C5752">FORMA ET FUNCTIO</text>
+  <text x="1080" y="855" font-family="Inter, sans-serif" font-size="11" fill="#5C5752"
+        text-anchor="end">18 / 84</text>
+</svg>

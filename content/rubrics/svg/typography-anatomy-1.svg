@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">
+  <!-- paper background -->
+  <rect width="1200" height="900" fill="#F4F1EA"/>
+
+  <!-- 3 competing same-weight headlines, three different fonts, three colors -->
+  <text x="80" y="120" font-family="Comic Sans MS, cursive" font-size="56" font-weight="700"
+        fill="#D8412F">Подпишись срочно!!!</text>
+
+  <text x="600" y="180" font-family="Times New Roman, serif" font-style="italic" font-size="56"
+        font-weight="700" fill="#1B3A8B">Лучший курс года</text>
+
+  <text x="380" y="260" font-family="Arial, sans-serif" font-size="56" font-weight="900"
+        fill="#E3B23C">МЕГА СКИДКА -70%</text>
+
+  <!-- 5 same-weight CTAs scattered, all cinnabar -->
+  <rect x="80" y="320" width="180" height="44" fill="#D8412F"/>
+  <text x="170" y="347" font-family="Arial, sans-serif" font-size="14" font-weight="700"
+        fill="#F4F1EA" text-anchor="middle">Подписаться</text>
+
+  <rect x="290" y="340" width="180" height="44" fill="#D8412F"/>
+  <text x="380" y="367" font-family="Arial, sans-serif" font-size="14" font-weight="700"
+        fill="#F4F1EA" text-anchor="middle">Купить курс</text>
+
+  <rect x="500" y="320" width="180" height="44" fill="#D8412F"/>
+  <text x="590" y="347" font-family="Arial, sans-serif" font-size="14" font-weight="700"
+        fill="#F4F1EA" text-anchor="middle">Скачать</text>
+
+  <rect x="710" y="345" width="180" height="44" fill="#D8412F"/>
+  <text x="800" y="372" font-family="Arial, sans-serif" font-size="14" font-weight="700"
+        fill="#F4F1EA" text-anchor="middle">Войти</text>
+
+  <rect x="920" y="325" width="180" height="44" fill="#D8412F"/>
+  <text x="1010" y="352" font-family="Arial, sans-serif" font-size="14" font-weight="700"
+        fill="#F4F1EA" text-anchor="middle">Free trial</text>
+
+  <!-- "Body" text in Times Roman, glued to headlines, no hierarchy -->
+  <text x="80" y="430" font-family="Times New Roman, serif" font-size="22" font-weight="700"
+        fill="#14110F">ВАЖНАЯ ИНФОРМАЦИЯ ПРОЧТИТЕ ВНИМАТЕЛЬНО</text>
+  <text x="80" y="465" font-family="Times New Roman, serif" font-size="20" fill="#14110F">
+    <tspan x="80" dy="0">Этот курс изменит вашу жизнь полностью без преувеличения.</tspan>
+    <tspan x="80" dy="26">Вы научитесь дизайну быстро эффективно и недорого всего за</tspan>
+    <tspan x="80" dy="26">короткое время и сразу станете востребованным специалистом.</tspan>
+  </text>
+
+  <!-- Mis-aligned center block -->
+  <text x="600" y="600" font-family="Arial, sans-serif" font-size="14" fill="#14110F"
+        text-anchor="middle">
+    <tspan x="600" dy="0">Это блок выровнен по центру а соседний по левому</tspan>
+    <tspan x="600" dy="20">краю — вёрстка плывёт без всякой логики.</tspan>
+  </text>
+
+  <!-- Mis-aligned right block, small italic Arial caption -->
+  <text x="1120" y="700" font-family="Arial, sans-serif" font-style="italic" font-size="11"
+        fill="#5C5752" text-anchor="end">
+    <tspan x="1120" dy="0">Подпись справа а заголовок слева</tspan>
+    <tspan x="1120" dy="14">потому что так получилось.</tspan>
+  </text>
+
+  <!-- Random extra link in lapis, looks like a sixth CTA -->
+  <text x="80" y="700" font-family="Arial, sans-serif" font-size="18" font-weight="700"
+        fill="#1B3A8B" text-decoration="underline">Жми сюда</text>
+
+  <!-- Random ochre badge -->
+  <rect x="220" y="680" width="160" height="32" fill="#E3B23C"/>
+  <text x="300" y="701" font-family="Comic Sans MS, cursive" font-size="14" font-weight="700"
+        fill="#14110F" text-anchor="middle">Только сегодня!</text>
+
+  <!-- Another lapis "headline" near bottom -->
+  <text x="450" y="780" font-family="Times New Roman, serif" font-style="italic" font-size="40"
+        font-weight="700" fill="#1B3A8B">И ещё один заголовок</text>
+</svg>
