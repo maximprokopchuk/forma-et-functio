@@ -95,6 +95,7 @@ export default async function GalleryPage({
       lessonSlug: row.lessonSlug,
       topicSlug: row.topicSlug,
       figmaUrl: row.figmaUrl,
+      imageUrl: row.imageUrl,
       description: row.description,
       summary,
       overall,
@@ -208,6 +209,24 @@ export default async function GalleryPage({
                       month: "long",
                     })}
                   </p>
+                  {item.imageUrl ? (
+                    <Link href={`/gallery/${item.id}`} aria-label="Открыть полный разбор">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.imageUrl}
+                        alt={`Скриншот работы ${item.userName}`}
+                        loading="lazy"
+                        decoding="async"
+                        className="bg-paper"
+                        style={{
+                          width: "100%",
+                          height: "auto",
+                          objectFit: "contain",
+                          border: "0.5px solid var(--rule)",
+                        }}
+                      />
+                    </Link>
+                  ) : null}
                   <h2 className="text-h3 text-ink">
                     <Link
                       href={`/gallery/${item.id}`}

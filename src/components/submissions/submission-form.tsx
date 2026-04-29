@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ImageUpload } from "./image-upload";
 
 /**
  * Submission form — plan §4.2.
@@ -52,6 +53,7 @@ export function SubmissionForm({
 }: SubmissionFormProps) {
   const [description, setDescription] = useState("");
   const [figmaUrl, setFigmaUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isPublic, setIsPublic] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [submissionId, setSubmissionId] = useState<string | null>(null);
@@ -146,6 +148,7 @@ export function SubmissionForm({
             topicSlug,
             description: description.trim(),
             figmaUrl: figmaUrl.trim() || undefined,
+            imageUrl: imageUrl ?? undefined,
             isPublic,
           }),
         });
@@ -170,7 +173,7 @@ export function SubmissionForm({
         setStatus("error");
       }
     },
-    [description, figmaUrl, isPublic, lessonSlug, topicSlug, status],
+    [description, figmaUrl, imageUrl, isPublic, lessonSlug, topicSlug, status],
   );
 
   if (!authed) {
@@ -320,21 +323,11 @@ export function SubmissionForm({
         />
       </label>
 
-      <div className="flex flex-col" style={{ gap: "6px" }}>
-        <span className="text-caption text-ink">Скриншот</span>
-        <button
-          type="button"
-          disabled
-          title="Скоро"
-          className="self-start text-caption text-ink-muted cursor-not-allowed"
-          style={{
-            border: "0.5px dashed var(--rule)",
-            padding: "10px 14px",
-          }}
-        >
-          Загрузить скриншот · скоро
-        </button>
-      </div>
+      <ImageUpload
+        value={imageUrl}
+        onChange={setImageUrl}
+        disabled={status === "submitting"}
+      />
 
       <label className="flex items-start" style={{ gap: "10px" }}>
         <input

@@ -48,6 +48,7 @@ async function loadEntry(id: string) {
     userName: row.user?.name ?? "Без имени",
     description: row.description,
     figmaUrl: row.figmaUrl,
+    imageUrl: row.imageUrl,
     createdAt: row.createdAt,
     trackSlug,
     lessonSlug: row.lessonSlug,
@@ -100,8 +101,40 @@ export default async function GalleryEntryPage({
   return (
     <article className="bg-paper">
       <Hero entry={entry} />
+      {entry.imageUrl ? <ImageBand entry={entry} /> : null}
       <Body entry={entry} />
     </article>
+  );
+}
+
+function ImageBand({ entry }: { entry: Entry }) {
+  if (!entry.imageUrl) return null;
+  return (
+    <section
+      className="grid-16"
+      style={{
+        paddingBlock: "48px",
+        borderTop: "0.5px solid var(--rule)",
+      }}
+      aria-label="Скриншот работы"
+    >
+      <div className="col-span-full xl:col-span-10 xl:col-start-3">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={entry.imageUrl}
+          alt={`Скриншот работы ${entry.userName} по теме ${entry.topicTitle}`}
+          loading="lazy"
+          decoding="async"
+          className="bg-paper"
+          style={{
+            width: "100%",
+            height: "auto",
+            objectFit: "contain",
+            border: "0.5px solid var(--rule)",
+          }}
+        />
+      </div>
+    </section>
   );
 }
 

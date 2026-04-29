@@ -9,6 +9,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const slugRe = /^[a-z0-9-]+$/;
+// Vercel Blob public URLs follow this pattern; restricting accept stops us
+// embedding arbitrary remote images in the AI prompt or gallery.
+const blobUrlRe =
+  /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/[^\s]+$/i;
 const submissionBodySchema = z.object({
   lessonSlug: z.string().min(1).max(100).regex(slugRe),
   topicSlug: z.string().min(1).max(100).regex(slugRe),
@@ -17,6 +21,13 @@ const submissionBodySchema = z.object({
     .trim()
     .max(500)
     .url()
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  imageUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .regex(blobUrlRe, "imageUrl должен быть Vercel Blob URL")
     .optional()
     .or(z.literal("").transform(() => undefined)),
   description: z.string().trim().min(1).max(1000),
@@ -62,6 +73,7 @@ export async function POST(req: Request) {
       lessonSlug: body.lessonSlug,
       topicSlug: body.topicSlug,
       figmaUrl: body.figmaUrl ?? null,
+      imageUrl: body.imageUrl ?? null,
       description: body.description,
       isPublic: body.isPublic,
       status: "PENDING",

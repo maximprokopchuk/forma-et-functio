@@ -36,6 +36,7 @@ export async function GET(
     lessonSlug: submission.lessonSlug,
     topicSlug: submission.topicSlug,
     figmaUrl: submission.figmaUrl,
+    imageUrl: submission.imageUrl,
     description: submission.description,
     isPublic: submission.isPublic,
     retryCount: submission.retryCount,
