@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Markdown } from "./markdown";
+
+const OPEN_KEY = "forma:chat:open";
 
 /**
  * Editorial chat panel — plan §11 / §20.3.
@@ -36,8 +39,50 @@ export function ChatPanel({ lessonSlug, topicSlug, authed }: ChatPanelProps) {
   const [loading, setLoading] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastFailedInput, setLastFailedInput] = useState<string | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // --- Restore last open/closed state across page loads. Keyed globally
+  //     (not per-topic) — chat is a sticky UI element, not topic-bound.
+  //     We start with open=false (matches SSR), then bump to true on mount
+  //     if the user had it open before; useSyncExternalStore would be the
+  //     by-the-book solution but it's overkill for a single boolean toggle.
+  useEffect(() => {
+    if (!authed || typeof window === "undefined") return;
+    if (window.localStorage.getItem(OPEN_KEY) === "1") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setOpen(true);
+    }
+  }, [authed]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(OPEN_KEY, open ? "1" : "0");
+  }, [open]);
+
+  // --- Reduced motion detection — disables the slide-up transition.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // --- Focus textarea when the panel opens; close on Escape.
+  useEffect(() => {
+    if (!open) return;
+    textareaRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   // --- Load history the first time the panel opens.
   useEffect(() => {
@@ -77,12 +122,13 @@ export function ChatPanel({ lessonSlug, topicSlug, authed }: ChatPanelProps) {
   }, [messages, open]);
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
+    async (e: React.FormEvent, overrideText?: string) => {
       e.preventDefault();
-      const trimmed = input.trim();
+      const trimmed = (overrideText ?? input).trim();
       if (!trimmed || loading) return;
 
       setError(null);
+      setLastFailedInput(null);
       setLoading(true);
 
       const localUserId = `local-u-${Date.now()}`;
@@ -136,7 +182,8 @@ export function ChatPanel({ lessonSlug, topicSlug, authed }: ChatPanelProps) {
       } catch (err) {
         const aborted = err instanceof DOMException && err.name === "AbortError";
         if (!aborted) {
-          setError("Не удалось получить ответ. Попробуйте ещё раз.");
+          setError("Не удалось получить ответ.");
+          setLastFailedInput(trimmed);
         }
         setMessages((prev) =>
           prev.map((m) =>
@@ -154,6 +201,14 @@ export function ChatPanel({ lessonSlug, topicSlug, authed }: ChatPanelProps) {
   const handleStop = useCallback(() => {
     abortRef.current?.abort();
   }, []);
+
+  const handleRetry = useCallback(
+    (e: React.MouseEvent) => {
+      if (!lastFailedInput) return;
+      void handleSubmit(e as unknown as React.FormEvent, lastFailedInput);
+    },
+    [handleSubmit, lastFailedInput],
+  );
 
   if (!authed) {
     // Unauthenticated: show a quiet inline hint, no floating pill.
@@ -191,7 +246,9 @@ export function ChatPanel({ lessonSlug, topicSlug, authed }: ChatPanelProps) {
             width: "min(440px, calc(100vw - 48px))",
             height: "min(640px, calc(100vh - 48px))",
             border: "0.5px solid var(--rule)",
-            transition: "transform var(--dur-small, 240ms) var(--ease-paper, ease)",
+            transition: reducedMotion
+              ? "none"
+              : "transform var(--dur-small, 240ms) var(--ease-paper, ease)",
           }}
         >
           <header
@@ -237,19 +294,36 @@ export function ChatPanel({ lessonSlug, topicSlug, authed }: ChatPanelProps) {
                   <p className="text-caption text-ink-muted">
                     {m.role === "user" ? "Вы" : "Преподаватель"}
                   </p>
-                  <p
-                    className="text-ink"
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontSize: "15px",
-                      lineHeight: "24px",
-                      whiteSpace: "pre-wrap",
-                      textIndent: "-1em",
-                      paddingLeft: "1em",
-                    }}
-                  >
-                    {m.content || (m.streaming ? "…" : "")}
-                  </p>
+                  {m.role === "assistant" ? (
+                    m.content ? (
+                      <div className="flex flex-col">
+                        <Markdown source={m.content} />
+                      </div>
+                    ) : (
+                      <p
+                        className="text-ink-muted"
+                        style={{
+                          fontFamily: "var(--font-display)",
+                          fontSize: "15px",
+                          lineHeight: "24px",
+                        }}
+                      >
+                        {m.streaming ? "…" : ""}
+                      </p>
+                    )
+                  ) : (
+                    <p
+                      className="text-ink"
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontSize: "15px",
+                        lineHeight: "24px",
+                        whiteSpace: "pre-wrap",
+                      }}
+                    >
+                      {m.content}
+                    </p>
+                  )}
                 </li>
               ))}
             </ul>
@@ -257,12 +331,22 @@ export function ChatPanel({ lessonSlug, topicSlug, authed }: ChatPanelProps) {
           </div>
 
           {error ? (
-            <p
-              className="text-caption text-cinnabar"
-              style={{ padding: "0 20px 8px" }}
+            <div
+              className="flex items-center"
+              style={{ padding: "0 20px 8px", gap: "12px" }}
             >
-              {error}
-            </p>
+              <p className="text-caption text-cinnabar">{error}</p>
+              {lastFailedInput ? (
+                <button
+                  type="button"
+                  onClick={handleRetry}
+                  className="text-caption text-ink motion-micro hover:text-cinnabar"
+                  style={{ letterSpacing: "0.05em" }}
+                >
+                  Повторить →
+                </button>
+              ) : null}
+            </div>
           ) : null}
 
           <form
@@ -280,6 +364,7 @@ export function ChatPanel({ lessonSlug, topicSlug, authed }: ChatPanelProps) {
             <textarea
               id="chat-input"
               name="message"
+              ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
