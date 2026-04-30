@@ -66,6 +66,19 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run test
 
+  contrast:
+    name: Contrast audit (WCAG)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run audit:contrast
+
   size:
     name: Bundle size
     runs-on: ubuntu-latest
