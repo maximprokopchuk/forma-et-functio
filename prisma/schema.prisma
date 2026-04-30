@@ -217,6 +217,22 @@ model ChatUsage {
   @@map("chat_usage")
 }
 
+model SubmissionUsage {
+  id               String   @id @default(cuid())
+  userId           String
+  day              DateTime @db.Date
+  // Mirrors ChatUsage shape so the same `incrementUsage` helper works
+  // against both. promptTokens here are the AI feedback prompt; messages
+  // is the count of submissions sent for grading.
+  promptTokens     Int      @default(0)
+  completionTokens Int      @default(0)
+  messages         Int      @default(0)
+
+  @@unique([userId, day])
+  @@index([day])
+  @@map("submission_usage")
+}
+
 model Rubric {
   id         String            @id
   dimensions RubricDimension[]

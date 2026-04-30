@@ -12,6 +12,7 @@ import { getRubric, type Rubric } from "@/lib/rubrics";
 import { getAIClient, MODEL_FEEDBACK } from "@/lib/ai/client";
 import { mockFeedback } from "@/lib/ai/mock";
 import { approxTokenCount } from "@/lib/ai/prompts";
+import { incrementUsage } from "@/lib/ai/usage";
 
 export const feedbackSchema = z.object({
   overall_score: z.number().min(1).max(5),
@@ -278,6 +279,20 @@ export async function generateFeedback(submissionId: string): Promise<void> {
         feedbackTokens: tokens,
       },
     });
+
+    // Daily SubmissionUsage — best-effort, doesn't block the FEEDBACK_READY
+    // write. Only fires on a successful grade so retry-cron re-runs of a
+    // failed submission don't double-count.
+    try {
+      await incrementUsage(submission.userId, "submission", {
+        promptTokens: tokens,
+      });
+    } catch (err) {
+      console.error(
+        `[feedback] failed to record usage for ${submissionId}:`,
+        err,
+      );
+    }
   } catch (err) {
     await db.submission.update({
       where: { id: submissionId },

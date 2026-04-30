@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { plural } from "@/lib/pluralize";
 import { streakStatus } from "@/lib/streak";
+import { getUsage } from "@/lib/ai/usage";
 import { TRACKS, type TrackSlug } from "@/lib/tracks";
 import { DigestToggle } from "@/components/profile/digest-toggle";
 
@@ -35,38 +36,41 @@ export default async function ProfilePage() {
   }
 
   const userId = session.user.id;
-  const [user, submissions, completedCount] = await Promise.all([
-    db.user.findUnique({
-      where: { id: userId },
-      select: {
-        name: true,
-        email: true,
-        currentStreak: true,
-        longestStreak: true,
-        lastStreakDay: true,
-        preferredTrack: true,
-        emailDigests: true,
-        createdAt: true,
-      },
-    }),
-    db.submission.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-      select: {
-        id: true,
-        topicSlug: true,
-        lessonSlug: true,
-        status: true,
-        isPublic: true,
-        likesCount: true,
-        createdAt: true,
-      },
-    }),
-    db.userProgress.count({
-      where: { userId, completed: true },
-    }),
-  ]);
+  const [user, submissions, completedCount, chatUsage, submissionUsage] =
+    await Promise.all([
+      db.user.findUnique({
+        where: { id: userId },
+        select: {
+          name: true,
+          email: true,
+          currentStreak: true,
+          longestStreak: true,
+          lastStreakDay: true,
+          preferredTrack: true,
+          emailDigests: true,
+          createdAt: true,
+        },
+      }),
+      db.submission.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        select: {
+          id: true,
+          topicSlug: true,
+          lessonSlug: true,
+          status: true,
+          isPublic: true,
+          likesCount: true,
+          createdAt: true,
+        },
+      }),
+      db.userProgress.count({
+        where: { userId, completed: true },
+      }),
+      getUsage(userId, "chat"),
+      getUsage(userId, "submission"),
+    ]);
   if (!user) redirect("/login");
 
   return (
@@ -83,6 +87,7 @@ export default async function ProfilePage() {
         lastStreakDay={user.lastStreakDay}
         completedCount={completedCount}
       />
+      <Quota chatUsage={chatUsage} submissionUsage={submissionUsage} />
       <Submissions rows={submissions} />
       <Settings emailDigests={user.emailDigests} />
     </article>
@@ -244,6 +249,77 @@ function Stat({
       {hint ? (
         <p className="text-caption text-ink-muted">{hint}</p>
       ) : null}
+    </div>
+  );
+}
+
+function Quota({
+  chatUsage,
+  submissionUsage,
+}: {
+  chatUsage: { used: number; cap: number; remaining: number };
+  submissionUsage: { used: number; cap: number; remaining: number };
+}) {
+  return (
+    <section
+      className="grid-16"
+      style={{
+        paddingBlock: "32px",
+        borderTop: "0.5px solid var(--rule)",
+      }}
+      aria-label="Дневные лимиты AI"
+    >
+      <div
+        className="col-span-full flex flex-col xl:col-span-10 xl:col-start-3"
+        style={{ gap: "12px" }}
+      >
+        <p className="text-caption text-ink-muted">
+          Дневные лимиты AI · сбросятся в полночь UTC
+        </p>
+        <div
+          className="flex flex-wrap"
+          style={{ gap: "32px" }}
+        >
+          <QuotaRow label="Чат" used={chatUsage.used} cap={chatUsage.cap} />
+          <QuotaRow
+            label="Проверка работ"
+            used={submissionUsage.used}
+            cap={submissionUsage.cap}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function QuotaRow({
+  label,
+  used,
+  cap,
+}: {
+  label: string;
+  used: number;
+  cap: number;
+}) {
+  const remaining = Math.max(0, cap - used);
+  const exhausted = remaining === 0;
+  return (
+    <div className="flex flex-col" style={{ gap: "4px" }}>
+      <p className="text-caption text-ink-muted">{label}</p>
+      <p
+        className="tabular-nums"
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "22px",
+          color: exhausted ? "var(--cinnabar)" : "var(--ink)",
+        }}
+      >
+        <span>{used}</span>
+        <span className="text-ink-muted"> / {cap}</span>
+      </p>
+      <p className="text-caption text-ink-muted">
+        {exhausted ? "Исчерпано" : `Осталось ${remaining}`}
+      </p>
     </div>
   );
 }

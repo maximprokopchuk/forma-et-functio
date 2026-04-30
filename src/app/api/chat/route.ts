@@ -5,6 +5,7 @@ import type { ModelMessage } from "ai";
 import { db } from "@/lib/db";
 import { requireAuth, unauthorized } from "@/lib/auth-guard";
 import { rateLimit } from "@/lib/rate-limit";
+import { getUsage, incrementUsage } from "@/lib/ai/usage";
 import { getAllTracks, getTopic } from "@/lib/content";
 import {
   buildChatSystemPrompt,
@@ -106,11 +107,24 @@ export async function POST(req: Request) {
       },
     );
   }
+
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const ipLimit = rateLimit(`chat-ip:${ip}`, 40, 60_000);
   if (!ipLimit.success) {
     return NextResponse.json(
       { error: "Слишком много запросов с этого адреса" },
+      { status: 429 },
+    );
+  }
+
+  // --- Daily AI cap (plan §11/§18). DB-backed so it survives deploys and
+  //     can't be bypassed by fan-out across in-memory rate-limit shards.
+  const dailyUsage = await getUsage(userId, "chat");
+  if (dailyUsage.exceeded) {
+    return NextResponse.json(
+      {
+        error: `Дневной лимит чата исчерпан (${dailyUsage.cap} сообщений). Сбросится в полночь UTC.`,
+      },
       { status: 429 },
     );
   }
@@ -275,26 +289,14 @@ export async function POST(req: Request) {
       console.error("[chat] failed to finalize assistant row:", err);
     }
 
-    // Track usage (best-effort). Approximate — real provider token counts are
-    // not available in the stream path consistently.
+    // Track usage (best-effort). Approximate — real provider token counts
+    // are not available in the stream path consistently. Counts every
+    // attempt regardless of outcome so users can't bypass the daily cap by
+    // aborting mid-stream.
     try {
-      const completionTokens = approxTokenCount(fullResponse);
-      const today = new Date();
-      today.setUTCHours(0, 0, 0, 0);
-      await db.chatUsage.upsert({
-        where: { userId_day: { userId, day: today } },
-        create: {
-          userId,
-          day: today,
-          promptTokens: promptTokensEstimate,
-          completionTokens,
-          messages: 1,
-        },
-        update: {
-          promptTokens: { increment: promptTokensEstimate },
-          completionTokens: { increment: completionTokens },
-          messages: { increment: 1 },
-        },
+      await incrementUsage(userId, "chat", {
+        promptTokens: promptTokensEstimate,
+        completionTokens: approxTokenCount(fullResponse),
       });
     } catch (err) {
       console.error("[chat] failed to record usage:", err);

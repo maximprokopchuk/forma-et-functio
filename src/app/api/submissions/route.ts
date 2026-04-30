@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAuth, unauthorized } from "@/lib/auth-guard";
-import { rateLimit } from "@/lib/rate-limit";
+import { getUsage } from "@/lib/ai/usage";
 import { generateFeedback } from "@/lib/ai/feedback";
 
 export const runtime = "nodejs";
@@ -46,10 +46,14 @@ export async function POST(req: Request) {
     return unauthorized();
   }
 
-  const rl = rateLimit(`submissions:${session.user.id}`, 10, 60 * 60_000); // 10/hr
-  if (!rl.success) {
+  // Daily DB-backed cap (plan §11/§18). Replaces the in-memory per-hour
+  // limiter — DB-tracking survives across deploys and shards.
+  const usage = await getUsage(session.user.id, "submission");
+  if (usage.exceeded) {
     return NextResponse.json(
-      { error: "Лимит submissions за час исчерпан" },
+      {
+        error: `Дневной лимит проверок исчерпан (${usage.cap}). Сбросится в полночь UTC.`,
+      },
       { status: 429 },
     );
   }
