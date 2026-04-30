@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 import { ImageUpload } from "./image-upload";
 
 /**
@@ -168,6 +169,12 @@ export function SubmissionForm({
         const data = (await res.json()) as { id: string };
         setSubmissionId(data.id);
         setStatus("pending");
+        trackEvent("Submission Created", {
+          lesson: lessonSlug,
+          topic: topicSlug,
+          hasImage: Boolean(imageUrl),
+          isPublic,
+        });
       } catch {
         setError("Сеть недоступна. Попробуйте ещё раз.");
         setStatus("error");

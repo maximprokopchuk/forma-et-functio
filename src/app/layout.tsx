@@ -116,9 +116,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   // Plausible is optional. It only loads when NEXT_PUBLIC_PLAUSIBLE_DOMAIN
-  // is set in the environment — keeps the dev/self-host path free of a
-  // third-party request and lets the user enable it without a code change.
+  // is set in the environment — keeps the dev path free of a third-party
+  // request and lets ops enable it without a code change.
+  // NEXT_PUBLIC_PLAUSIBLE_HOST overrides the script source for self-hosted
+  // installs (defaults to plausible.io). The `tagged-events` variant adds
+  // window.plausible() for custom events, used by lib/analytics.ts.
   const plausibleDomain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
+  const plausibleHost =
+    process.env.NEXT_PUBLIC_PLAUSIBLE_HOST ?? "https://plausible.io";
 
   return (
     <html
@@ -138,7 +143,7 @@ export default function RootLayout({
           <Script
             defer
             data-domain={plausibleDomain}
-            src="https://plausible.io/js/script.js"
+            src={`${plausibleHost.replace(/\/$/, "")}/js/script.tagged-events.js`}
             strategy="afterInteractive"
           />
         ) : null}

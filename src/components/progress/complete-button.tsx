@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * "Пройдено" toggle — plan §5 / §14.
@@ -80,6 +81,14 @@ export function CompleteButton({ lessonSlug, topicSlug, authed }: Props) {
         // Refresh server components so the header StreakBadge picks up the
         // new value without a full navigation.
         router.refresh();
+        // Conversion event — only fired on a NEW completion (streakChanged
+        // implies isNewCompletion server-side); re-completion or un-mark
+        // doesn't pollute the analytics.
+        trackEvent("Topic Completed", {
+          lesson: lessonSlug,
+          topic: topicSlug,
+          streak: data.streak.current,
+        });
       }
     } catch {
       setError("Сеть недоступна");
