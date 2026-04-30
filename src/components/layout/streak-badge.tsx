@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { streakStatus } from "@/lib/streak";
 
 /**
  * Streak badge — Duolingo-style loss-aversion device, in editorial register.
@@ -8,29 +9,8 @@ import { db } from "@/lib/db";
  *   - older/null → not rendered
  *
  * Server component. Reads directly from db so the badge reflects the canonical
- * value at render time without a client round-trip. The CompleteButton fires
- * a `streak:changed` CustomEvent so a small client wrapper can re-fetch when
- * a topic is marked complete on the same page.
+ * value at render time without a client round-trip.
  */
-
-type Status = "today" | "atRisk";
-
-function classify(lastStreakDay: Date | null): Status | null {
-  if (!lastStreakDay) return null;
-  const dayMs = 24 * 60 * 60_000;
-  const today = startOfUTCDay(new Date());
-  const last = startOfUTCDay(lastStreakDay);
-  const diffDays = Math.round((today.getTime() - last.getTime()) / dayMs);
-  if (diffDays === 0) return "today";
-  if (diffDays === 1) return "atRisk";
-  return null;
-}
-
-function startOfUTCDay(d: Date): Date {
-  return new Date(
-    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
-  );
-}
 
 export async function StreakBadge({ userId }: { userId: string }) {
   const user = await db.user.findUnique({
@@ -39,8 +19,8 @@ export async function StreakBadge({ userId }: { userId: string }) {
   });
   if (!user) return null;
   if (user.currentStreak <= 0) return null;
-  const status = classify(user.lastStreakDay);
-  if (!status) return null;
+  const status = streakStatus(user.lastStreakDay);
+  if (status === "burned") return null;
 
   const dotColor = status === "today" ? "bg-cinnabar" : "bg-rule";
   const numColor = status === "today" ? "text-ink" : "text-ink-muted";

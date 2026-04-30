@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { plural } from "@/lib/pluralize";
+import { streakStatus } from "@/lib/streak";
 import { TRACKS, type TrackSlug } from "@/lib/tracks";
 import { DigestToggle } from "@/components/profile/digest-toggle";
 
@@ -372,19 +373,3 @@ function Settings({ emailDigests }: { emailDigests: boolean }) {
   );
 }
 
-function streakStatus(lastStreakDay: Date | null): "today" | "atRisk" | "burned" {
-  if (!lastStreakDay) return "burned";
-  const dayMs = 24 * 60 * 60_000;
-  const today = startOfUTCDay(new Date());
-  const last = startOfUTCDay(lastStreakDay);
-  const diff = Math.round((today.getTime() - last.getTime()) / dayMs);
-  if (diff === 0) return "today";
-  if (diff === 1) return "atRisk";
-  return "burned";
-}
-
-function startOfUTCDay(d: Date): Date {
-  return new Date(
-    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
-  );
-}

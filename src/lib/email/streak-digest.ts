@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email/client";
 import { plural } from "@/lib/pluralize";
+import { startOfUTCDay } from "@/lib/streak";
 
 /**
  * Daily streak-at-risk digest — plan §17.
@@ -20,12 +21,6 @@ export type DigestResult = {
   skipped: number;
   failures: Array<{ userId: string; error: string }>;
 };
-
-function startOfUTCDay(d: Date): Date {
-  return new Date(
-    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
-  );
-}
 
 export async function sendStreakDigest({
   origin,

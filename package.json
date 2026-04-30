@@ -23,7 +23,9 @@
     "size": "size-limit",
     "typecheck": "tsc --noEmit",
     "lhci": "lhci autorun",
-    "pa11y": "pa11y-ci"
+    "pa11y": "pa11y-ci",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.0",
@@ -77,6 +79,8 @@
     "size-limit": "^12.1.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^6.4.2",
+    "vitest": "^3.2.4"
   }
 }

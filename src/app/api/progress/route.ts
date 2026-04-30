@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAuth, unauthorized } from "@/lib/auth-guard";
 import { getAllTracks } from "@/lib/content";
+import { startOfUTCDay } from "@/lib/streak";
 import type { Track, BloomsLevel } from "@prisma/client";
 import type { TrackSlug } from "@/lib/tracks";
 
@@ -258,8 +259,3 @@ export async function POST(req: Request) {
   });
 }
 
-function startOfUTCDay(d: Date): Date {
-  const x = new Date(d);
-  x.setUTCHours(0, 0, 0, 0);
-  return x;
-}
