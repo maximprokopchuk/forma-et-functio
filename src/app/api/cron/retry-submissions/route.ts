@@ -1,21 +1,20 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { generateFeedback } from "@/lib/ai/feedback";
+import { verifyCronAuth } from "@/lib/cron-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
  * Retry-cron for FEEDBACK_FAILED submissions — plan §4.6.
- * Authed by a shared secret header (`x-cron-secret`) set in Vercel Cron.
+ * Authed via verifyCronAuth (Vercel Cron Bearer or legacy x-cron-secret).
  * Picks up rows with retryCount < 3 and re-runs the AI pipeline.
  *
- * Vercel Cron config (vercel.json) should hit this hourly.
+ * Vercel Cron config (vercel.json) hits this every 6 hours.
  */
 export async function GET(req: Request) {
-  const secret = req.headers.get("x-cron-secret");
-  const expected = process.env.CRON_SECRET;
-  if (!expected || secret !== expected) {
+  if (!verifyCronAuth(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sendStreakDigest } from "@/lib/email/streak-digest";
+import { verifyCronAuth } from "@/lib/cron-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,9 +13,7 @@ export const dynamic = "force-dynamic";
  * a reasonable window before the streak burns at next UTC midnight.
  */
 export async function GET(req: Request) {
-  const secret = req.headers.get("x-cron-secret");
-  const expected = process.env.CRON_SECRET;
-  if (!expected || secret !== expected) {
+  if (!verifyCronAuth(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

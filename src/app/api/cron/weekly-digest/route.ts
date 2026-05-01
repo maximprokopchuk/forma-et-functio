@@ -1,20 +1,18 @@
 import { NextResponse } from "next/server";
 import { sendWeeklyDigest } from "@/lib/email/weekly-digest";
+import { verifyCronAuth } from "@/lib/cron-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
  * Weekly summary digest cron — plan §17.
- * Authed via x-cron-secret (matches retry-submissions / streak-digest).
+ * Authed via verifyCronAuth (Vercel Cron Bearer or legacy x-cron-secret).
  * Vercel Cron config in vercel.json hits this on Sundays at 09:00 UTC,
- * which lands ~12:00 Moscow / 02:00 US Pacific — Sunday morning for
- * European audience, Saturday late evening for US west.
+ * which lands ~12:00 Moscow / 02:00 US Pacific.
  */
 export async function GET(req: Request) {
-  const secret = req.headers.get("x-cron-secret");
-  const expected = process.env.CRON_SECRET;
-  if (!expected || secret !== expected) {
+  if (!verifyCronAuth(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
