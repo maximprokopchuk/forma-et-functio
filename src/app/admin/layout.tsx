@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Settings, Users, FileCheck, AlertCircle, BookOpen } from "lucide-react";
+import { Settings, Users, FileCheck, AlertCircle, BookOpen, Trophy } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-guard";
 
@@ -47,6 +47,7 @@ export default async function AdminLayout({
       badge: unresolvedReports > 0 ? unresolvedReports : null,
     },
     { href: "/admin/content", label: "Контент", icon: BookOpen, badge: null as number | null },
+    { href: "/admin/challenges", label: "Челленджи", icon: Trophy, badge: null as number | null },
   ];
 
   return (

@@ -49,6 +49,12 @@ export async function Header() {
             >
               Галерея
             </Link>
+            <Link
+              href="/challenges"
+              className="text-caption text-ink motion-micro hover:text-cinnabar"
+            >
+              Челленджи
+            </Link>
             {isAdmin ? (
               <Link
                 href="/admin"

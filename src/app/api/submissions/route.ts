@@ -30,6 +30,13 @@ const submissionBodySchema = z.object({
     .regex(blobUrlRe, "imageUrl должен быть Vercel Blob URL")
     .optional()
     .or(z.literal("").transform(() => undefined)),
+  challengeId: z
+    .string()
+    .trim()
+    .max(40)
+    .regex(/^[a-z0-9]+$/i, "challengeId — cuid")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
   description: z.string().trim().min(1).max(1000),
   isPublic: z.boolean().default(false),
 });
@@ -71,11 +78,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Неверный JSON" }, { status: 400 });
   }
 
+  // If a challengeId is supplied, validate it points at a PUBLISHED row.
+  // DRAFT and ARCHIVED challenges silently drop the link — never reject the
+  // submission outright; the user's work is still graded against the topic.
+  let validChallengeId: string | null = null;
+  if (body.challengeId) {
+    const challenge = await db.challenge.findUnique({
+      where: { id: body.challengeId },
+      select: { id: true, status: true, endsAt: true },
+    });
+    if (challenge && challenge.status === "PUBLISHED" && challenge.endsAt > new Date()) {
+      validChallengeId = challenge.id;
+    }
+  }
+
   const submission = await db.submission.create({
     data: {
       userId: session.user.id,
       lessonSlug: body.lessonSlug,
       topicSlug: body.topicSlug,
+      challengeId: validChallengeId,
       figmaUrl: body.figmaUrl ?? null,
       imageUrl: body.imageUrl ?? null,
       description: body.description,
