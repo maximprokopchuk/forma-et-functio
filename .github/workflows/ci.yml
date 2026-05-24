@@ -95,6 +95,7 @@ jobs:
           # Build needs *some* DB url to satisfy Prisma generate, but does
           # not connect at build time for our routes (all are dynamic).
           DATABASE_URL: "postgresql://user:pass@localhost:5432/dummy"
+          DIRECT_DATABASE_URL: "postgresql://user:pass@localhost:5432/dummy"
           NEXTAUTH_SECRET: "ci-build-secret"
           NEXTAUTH_URL: "http://localhost:3000"
       - run: pnpm run size
@@ -118,6 +119,7 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: "postgresql://forma:forma@localhost:5432/forma_test"
+      DIRECT_DATABASE_URL: "postgresql://forma:forma@localhost:5432/forma_test"
       NEXTAUTH_SECRET: "ci-test-secret"
       NEXTAUTH_URL: "http://localhost:3000"
     steps:

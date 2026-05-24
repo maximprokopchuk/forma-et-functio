@@ -29,6 +29,7 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: "postgresql://forma:forma@localhost:5432/forma_test"
+      DIRECT_DATABASE_URL: "postgresql://forma:forma@localhost:5432/forma_test"
       NEXTAUTH_SECRET: "ci-pa11y-secret"
       NEXTAUTH_URL: "http://localhost:3000"
     steps:
