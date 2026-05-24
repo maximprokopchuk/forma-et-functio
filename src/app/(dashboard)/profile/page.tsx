@@ -73,13 +73,17 @@ export default async function ProfilePage() {
     ]);
   if (!user) redirect("/login");
 
+  const preferredTrackSlug = user.preferredTrack
+    ? (user.preferredTrack.toLowerCase() as TrackSlug)
+    : null;
+
   return (
     <article className="bg-paper">
       <Hero
         name={user.name ?? "—"}
         email={user.email}
         memberSince={user.createdAt}
-        preferredTrack={user.preferredTrack as TrackSlug | null}
+        preferredTrack={preferredTrackSlug}
       />
       <Stats
         currentStreak={user.currentStreak}

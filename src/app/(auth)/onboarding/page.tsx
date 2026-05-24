@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Wordmark } from "@/components/layout/wordmark";
 import {
   TRACKS,
   TRACK_SLUGS,
@@ -11,7 +10,7 @@ import {
   type TrackSlug,
 } from "@/lib/tracks";
 
-type Screen = 1 | 2 | 3 | 4;
+type Screen = 1 | 2 | 3;
 
 type Level = "beginner" | "intermediate" | "advanced";
 
@@ -49,7 +48,6 @@ export default function OnboardingPage() {
   const router = useRouter();
   const { update } = useSession();
   const [screen, setScreen] = useState<Screen>(1);
-  const [name, setName] = useState("");
   const [track, setTrack] = useState<TrackSlug | null>(null);
   const [level, setLevel] = useState<Level | null>(null);
   const [goal, setGoal] = useState("");
@@ -64,7 +62,6 @@ export default function OnboardingPage() {
       preferredTrack: track ? TRACK_SLUG_TO_ENUM[track] : null,
       preferredLevel: level ? LEVEL_TO_BLOOMS[level] : null,
     };
-    if (name.trim()) payload.name = name.trim();
     if (goal.trim()) payload.goal = goal.trim();
 
     try {
@@ -107,32 +104,25 @@ export default function OnboardingPage() {
       ) : null}
 
       {screen === 1 ? (
-        <ScreenWelcome
-          name={name}
-          onName={setName}
-          onNext={() => setScreen(2)}
-        />
-      ) : null}
-      {screen === 2 ? (
         <ScreenTrack
           selected={track}
           onSelect={(slug) => {
             setTrack(slug);
             // Give the underline animation a beat, then advance.
+            window.setTimeout(() => setScreen(2), 240);
+          }}
+        />
+      ) : null}
+      {screen === 2 ? (
+        <ScreenLevel
+          selected={level}
+          onSelect={(lv) => {
+            setLevel(lv);
             window.setTimeout(() => setScreen(3), 240);
           }}
         />
       ) : null}
       {screen === 3 ? (
-        <ScreenLevel
-          selected={level}
-          onSelect={(lv) => {
-            setLevel(lv);
-            window.setTimeout(() => setScreen(4), 240);
-          }}
-        />
-      ) : null}
-      {screen === 4 ? (
         <ScreenGoal
           goal={goal}
           onGoal={setGoal}
@@ -140,46 +130,6 @@ export default function OnboardingPage() {
           onFinish={finish}
         />
       ) : null}
-    </div>
-  );
-}
-
-function ScreenWelcome({
-  name,
-  onName,
-  onNext,
-}: {
-  name: string;
-  onName: (v: string) => void;
-  onNext: () => void;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-12 px-4 py-24 text-center">
-      <Wordmark size="xl" />
-      <p className="text-body-l text-ink" style={{ maxWidth: "48ch" }}>
-        Учебник цифрового дизайна.
-      </p>
-      <label className="flex flex-col items-center gap-2">
-        <span className="text-caption text-ink-muted">Имя (по желанию)</span>
-        <input
-          value={name}
-          onChange={(e) => onName(e.target.value)}
-          placeholder="Как вас зовут?"
-          className="border-b border-rule bg-transparent text-body text-ink motion-micro focus:border-cinnabar focus:outline-none"
-          style={{
-            minWidth: "240px",
-            paddingBlock: "4px",
-            textAlign: "center",
-          }}
-        />
-      </label>
-      <button
-        type="button"
-        onClick={onNext}
-        className="text-caption text-cinnabar motion-micro hover:underline"
-      >
-        Войти →
-      </button>
     </div>
   );
 }

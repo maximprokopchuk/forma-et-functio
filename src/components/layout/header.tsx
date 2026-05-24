@@ -5,6 +5,13 @@ import { LogoMark } from "./wordmark";
 import { ThemeToggle } from "./theme-toggle";
 import { StreakBadge } from "./streak-badge";
 import { ReviewBadge } from "./review-badge";
+import { SignOutLink } from "./sign-out-link";
+
+function displayName(name?: string | null, email?: string | null): string {
+  if (name && name.trim()) return name.trim().split(/\s+/)[0]!;
+  if (email) return email.split("@")[0]!;
+  return "Профиль";
+}
 
 /**
  * Editorial header — 72px paper band, logo left, sparse nav right.
@@ -15,6 +22,7 @@ export async function Header() {
   const isAuthed = Boolean(session?.user?.id);
   const isAdmin = session?.user?.role === "ADMIN";
   const userId = session?.user?.id;
+  const userLabel = displayName(session?.user?.name, session?.user?.email);
 
   return (
     <header className="relative w-full bg-paper">
@@ -38,22 +46,10 @@ export async function Header() {
               Уроки
             </Link>
             <Link
-              href="/widgets"
-              className="text-caption text-ink motion-micro hover:text-cinnabar"
-            >
-              Виджеты
-            </Link>
-            <Link
               href="/gallery"
               className="text-caption text-ink motion-micro hover:text-cinnabar"
             >
               Галерея
-            </Link>
-            <Link
-              href="/challenges"
-              className="text-caption text-ink motion-micro hover:text-cinnabar"
-            >
-              Челленджи
             </Link>
             {isAdmin ? (
               <Link
@@ -64,12 +60,16 @@ export async function Header() {
               </Link>
             ) : null}
             {isAuthed ? (
-              <Link
-                href="/profile"
-                className="text-caption text-ink motion-micro hover:text-cinnabar"
-              >
-                Профиль
-              </Link>
+              <>
+                <Link
+                  href="/profile"
+                  className="text-caption text-ink motion-micro hover:text-cinnabar"
+                  aria-label={`Профиль (${userLabel})`}
+                >
+                  {userLabel}
+                </Link>
+                <SignOutLink />
+              </>
             ) : (
               <>
                 <Link
