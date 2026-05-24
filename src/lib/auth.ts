@@ -81,6 +81,7 @@ export const authOptions: NextAuthOptions = {
             const dbUser = await db.user.findUnique({
               where: { id: userId },
               select: {
+                email: true,
                 role: true,
                 preferredTrack: true,
                 preferredLevel: true,
@@ -89,7 +90,25 @@ export const authOptions: NextAuthOptions = {
               },
             });
             if (dbUser) {
-              token.role = dbUser.role;
+              // Env-driven admin promotion: emails listed in ADMIN_EMAILS
+              // get role=ADMIN automatically on first sign-in, persisted to
+              // DB so server-side queries reading user.role reflect it.
+              const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+                .split(",")
+                .map((e) => e.trim().toLowerCase())
+                .filter(Boolean);
+              const isEnvAdmin =
+                dbUser.email !== null &&
+                adminEmails.includes(dbUser.email.toLowerCase());
+              if (isEnvAdmin && dbUser.role !== "ADMIN") {
+                await db.user.update({
+                  where: { id: userId },
+                  data: { role: "ADMIN" },
+                });
+                token.role = "ADMIN";
+              } else {
+                token.role = dbUser.role;
+              }
               token.preferredTrack = dbUser.preferredTrack ?? null;
               token.preferredLevel = dbUser.preferredLevel ?? null;
               token.showAllLevels = dbUser.showAllLevels;

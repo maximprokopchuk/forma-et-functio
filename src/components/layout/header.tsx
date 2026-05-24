@@ -70,7 +70,22 @@ export async function Header() {
               >
                 Профиль
               </Link>
-            ) : null}
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-caption text-ink motion-micro hover:text-cinnabar"
+                >
+                  Войти
+                </Link>
+                <Link
+                  href="/register"
+                  className="text-caption text-cinnabar-on-paper motion-micro hover:underline underline-offset-4"
+                >
+                  Регистрация
+                </Link>
+              </>
+            )}
             {userId ? <ReviewBadge userId={userId} /> : null}
             {userId ? <StreakBadge userId={userId} /> : null}
             <ThemeToggle />
