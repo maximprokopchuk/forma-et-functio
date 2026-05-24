@@ -130,7 +130,7 @@ export function HierarchyReorder({
         <button
           type="button"
           onClick={check}
-          className="text-caption text-cinnabar motion-micro hover:underline underline-offset-4"
+          className="text-caption text-cinnabar-on-paper motion-micro hover:underline underline-offset-4"
         >
           Проверить →
         </button>

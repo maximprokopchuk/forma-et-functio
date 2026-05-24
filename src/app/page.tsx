@@ -77,7 +77,7 @@ function HeroCaption({ value, label }: { value?: string; label: string }) {
     <span className="text-caption text-ink">
       {value ? (
         <>
-          <span className="text-cinnabar tabular-nums">{value}</span> {label}
+          <span className="text-cinnabar-on-paper tabular-nums">{value}</span> {label}
         </>
       ) : (
         label

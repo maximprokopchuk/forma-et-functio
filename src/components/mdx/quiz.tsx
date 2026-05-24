@@ -38,7 +38,7 @@ export function Quiz({
         style={{ transform: "scaleY(0.5)", transformOrigin: "top" }}
       />
       <div className="flex flex-col gap-3">
-        <p className="text-caption text-ochre">Проверка</p>
+        <p className="text-caption text-ochre-on-paper">Проверка</p>
         <p
           className="text-ink"
           style={{

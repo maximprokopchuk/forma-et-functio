@@ -26,8 +26,10 @@
   --color-ink-strip: var(--accent-ink-strip);
   --color-rule: var(--rule);
   --color-cinnabar: var(--cinnabar);
+  --color-cinnabar-on-paper: var(--cinnabar-on-paper);
   --color-lapis: var(--lapis);
   --color-ochre: var(--ochre);
+  --color-ochre-on-paper: var(--ochre-on-paper);
 
   /* shadcn token bridge — so copied shadcn/ui components keep working.
      These are thin aliases onto our palette; real design decisions live
@@ -106,9 +108,17 @@
   --ink-muted: oklch(0.18 0.01 60 / 0.6);
   /* rule: was 0.82 — too faint on paper; bump slightly so hairlines read. */
   --rule: oklch(0.78 0.01 80);
-  --cinnabar: oklch(0.62 0.18 35);
+  --cinnabar: oklch(0.58 0.19 35);
+  /* cinnabar-on-paper: darker variant for body/caption text on paper bg.
+     Brand cinnabar (L 0.58 → ~3.9:1 against paper) is reserved for display
+     type and CTA backgrounds. For ≥4.5:1 (WCAG AA body) we drop L further. */
+  --cinnabar-on-paper: oklch(0.50 0.19 35);
   --lapis: oklch(0.36 0.14 265);
   --ochre: oklch(0.78 0.13 85);
+  /* ochre-on-paper: brand ochre (L 0.78) gives only 1.79:1 against paper —
+     unusable for any text. Body text on paper needs a much darker variant
+     that reads as burnt amber, not bright yellow-ochre. */
+  --ochre-on-paper: oklch(0.50 0.13 85);
   /* half-step off paper — used for hover on track/lesson rows. */
   --paper-hover: oklch(0.93 0.012 85);
   /* Accent strip for the CRAFT track. In light this is near-black ink;
@@ -117,8 +127,10 @@
   --accent-ink-strip: oklch(0.22 0.01 60);
   /* Invariant cream — used for text placed on the synthesis cinnabar band.
      The cinnabar band is "earned" and stays cream-on-red in both themes
-     (text-paper would flip to near-black in dark, losing the treatment). */
-  --paper-on-accent: oklch(0.96 0.012 85);
+     (text-paper would flip to near-black in dark, losing the treatment).
+     Held near pure white so body text (text-caption "Итог", body-l description)
+     reaches AA-body 4.5:1 against the darkened cinnabar. */
+  --paper-on-accent: oklch(0.99 0.005 85);
 
   /* shadcn bridge — mapped onto editorial palette */
   --card: var(--paper);
@@ -170,9 +182,13 @@
   /* cinnabar in dark: brighter + a touch more chroma so it sings on brown-black.
      Matches the #E8604D target from the plan. */
   --cinnabar: oklch(0.70 0.19 35);
+  /* cinnabar-on-paper dark: brighter than display cinnabar so caption-size
+     text on paper-dark hits 4.5:1. */
+  --cinnabar-on-paper: oklch(0.78 0.17 35);
   /* lapis in dark: previous 0.58 was too muddy against paper-dark. Raise L. */
   --lapis: oklch(0.66 0.14 265);
   --ochre: oklch(0.84 0.13 85);
+  --ochre-on-paper: oklch(0.86 0.13 85);
   /* half-step off paper-dark — hover. Slightly warmer/lifted, stays close. */
   --paper-hover: oklch(0.23 0.02 60);
   /* Accent strip — in dark we want it to read as a quiet rule, not a beacon. */

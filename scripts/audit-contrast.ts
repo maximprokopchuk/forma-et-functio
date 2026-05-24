@@ -63,18 +63,36 @@ const PAIRS: Pair[] = [
     note: "Cinnabar large display text / CTA",
   },
 
+  // Darker cinnabar variant — used for body/caption text on paper bg
+  // (HeroCaption metric, quiz/widget action buttons). Must hit AA-body 4.5:1.
+  {
+    fg: "cinnabar-on-paper",
+    bg: "paper",
+    tier: "body",
+    note: "Cinnabar body/caption text on paper",
+  },
+
+  // Darker ochre variant — used for MDX eyebrow labels (Упражнение, Проверка)
+  // at caption size. Brand ochre is a yellow display accent and unusable for
+  // body text; this variant reads as burnt amber and clears AA-body.
+  {
+    fg: "ochre-on-paper",
+    bg: "paper",
+    tier: "body",
+    note: "Ochre body/caption text on paper",
+  },
+
   // Editorial cream text on the synthesis cinnabar band. The band carries
-  // display-m / display-l text only (h2 + key takeaways in 19px serif), so
-  // tier "large" is correct.
+  // both display text (h2, body-l description ≥19px) AND a text-caption
+  // "Итог" label, so we audit at the stricter body tier.
   //
-  // Light passes 3:1 comfortably. Dark mode lands at ~2.57 — design
-  // tension noted in plan §15 (dark cinnabar must read as bright, and the
-  // cream stays cream invariant). Until the palette is rebalanced, the
-  // dark variant is excluded from the gate; the issue is tracked.
+  // Dark mode tension noted in plan §15 (dark cinnabar must read as bright,
+  // cream stays cream invariant). The dark variant is excluded from the
+  // gate; tracked in plan, accepted compromise for now.
   {
     fg: "paper-on-accent",
     bg: "cinnabar",
-    tier: "large",
+    tier: "body",
     themes: ["light"],
     note: "Cream on cinnabar band (light only — dark needs design fix)",
   },

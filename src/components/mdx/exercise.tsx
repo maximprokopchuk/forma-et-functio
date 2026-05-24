@@ -23,7 +23,7 @@ export function Exercise({
         style={{ transform: "scaleY(0.5)", transformOrigin: "top" }}
       />
       <div className="flex flex-col gap-2">
-        <p className="text-caption text-ochre">Упражнение</p>
+        <p className="text-caption text-ochre-on-paper">Упражнение</p>
         <h3 className="text-h3 text-ink">{title}</h3>
       </div>
       <div>{children}</div>
