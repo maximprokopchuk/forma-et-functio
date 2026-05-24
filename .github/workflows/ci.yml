@@ -90,9 +90,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run build
+      - name: Build (skip migrate — size check only)
+        run: pnpm exec next build
         env:
-          # Build needs *some* DB url to satisfy Prisma generate, but does
+          # Build needs *some* DB url to satisfy Prisma client init, but does
           # not connect at build time for our routes (all are dynamic).
           DATABASE_URL: "postgresql://user:pass@localhost:5432/dummy"
           DIRECT_DATABASE_URL: "postgresql://user:pass@localhost:5432/dummy"

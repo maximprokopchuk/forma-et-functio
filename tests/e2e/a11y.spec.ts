@@ -33,19 +33,19 @@ async function expectClean(page: Page) {
 test.describe("Accessibility — axe", () => {
   test("homepage", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
     await expectClean(page);
   });
 
   test("track index", async ({ page }) => {
     await page.goto("/lessons/foundations");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
     await expectClean(page);
   });
 
   test("topic page", async ({ page }) => {
     await page.goto("/lessons/foundations/typography/01-anatomy");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
     await expectClean(page);
   });
 });
