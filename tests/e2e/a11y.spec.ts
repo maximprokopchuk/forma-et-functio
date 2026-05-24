@@ -23,7 +23,17 @@ async function expectClean(page: Page) {
   );
   if (blocking.length > 0) {
     const summary = blocking
-      .map((v) => `[${v.impact}] ${v.id}: ${v.help} (nodes: ${v.nodes.length})`)
+      .map((v) => {
+        const nodes = v.nodes
+          .map((n) => {
+            const target = n.target.join(" ");
+            const html = n.html.length > 200 ? `${n.html.slice(0, 200)}…` : n.html;
+            const fail = n.failureSummary?.replace(/\n/g, " | ") ?? "";
+            return `    - ${target}\n      HTML: ${html}\n      Fail: ${fail}`;
+          })
+          .join("\n");
+        return `[${v.impact}] ${v.id}: ${v.help} (nodes: ${v.nodes.length})\n${nodes}`;
+      })
       .join("\n");
     throw new Error(`Axe found ${blocking.length} blocking violations:\n${summary}`);
   }
