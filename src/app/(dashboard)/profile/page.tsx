@@ -9,6 +9,7 @@ import { streakStatus } from "@/lib/streak";
 import { getUsage } from "@/lib/ai/usage";
 import { TRACKS, type TrackSlug } from "@/lib/tracks";
 import { DigestToggle } from "@/components/profile/digest-toggle";
+import { NameEditor } from "@/components/profile/name-editor";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -93,7 +94,7 @@ export default async function ProfilePage() {
       />
       <Quota chatUsage={chatUsage} submissionUsage={submissionUsage} />
       <Submissions rows={submissions} />
-      <Settings emailDigests={user.emailDigests} />
+      <Settings name={user.name ?? ""} emailDigests={user.emailDigests} />
     </article>
   );
 }
@@ -432,7 +433,13 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function Settings({ emailDigests }: { emailDigests: boolean }) {
+function Settings({
+  name,
+  emailDigests,
+}: {
+  name: string;
+  emailDigests: boolean;
+}) {
   return (
     <section
       className="grid-16"
@@ -444,9 +451,10 @@ function Settings({ emailDigests }: { emailDigests: boolean }) {
     >
       <div
         className="col-span-full flex flex-col xl:col-span-10 xl:col-start-3"
-        style={{ gap: "16px" }}
+        style={{ gap: "24px" }}
       >
         <p className="text-caption text-ink-muted">Настройки</p>
+        <NameEditor initial={name} />
         <DigestToggle initial={emailDigests} />
       </div>
     </section>

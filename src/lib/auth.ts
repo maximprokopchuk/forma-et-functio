@@ -82,6 +82,7 @@ export const authOptions: NextAuthOptions = {
               where: { id: userId },
               select: {
                 email: true,
+                name: true,
                 role: true,
                 preferredTrack: true,
                 preferredLevel: true,
@@ -90,6 +91,9 @@ export const authOptions: NextAuthOptions = {
               },
             });
             if (dbUser) {
+              // Refresh cached display name from DB so an in-product name
+              // edit (NameEditor) propagates to the header on update().
+              token.name = dbUser.name ?? token.name;
               // Env-driven admin promotion: emails listed in ADMIN_EMAILS
               // get role=ADMIN automatically on first sign-in, persisted to
               // DB so server-side queries reading user.role reflect it.
