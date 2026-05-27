@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Public routes", () => {
-  test("homepage loads with wordmark and 4 track rows", async ({ page }) => {
+  test("homepage loads with wordmark and CTA", async ({ page }) => {
     const response = await page.goto("/");
     expect(response?.status()).toBe(200);
 
@@ -10,8 +10,16 @@ test.describe("Public routes", () => {
     await expect(page.getByText("forma", { exact: false }).first()).toBeVisible();
     await expect(page.getByText("functio", { exact: false }).first()).toBeVisible();
 
+    // CTA into the lesson catalog.
+    await expect(page.getByRole("link", { name: /Открыть уроки/ })).toBeVisible();
+  });
+
+  test("lessons catalog shows 4 track rows", async ({ page }) => {
+    const response = await page.goto("/lessons");
+    expect(response?.status()).toBe(200);
+
     // 4 track rows — each is a <h2> inside a link.
-    const trackHeadings = page.locator("section[aria-label=\"Треки\"] h2");
+    const trackHeadings = page.locator('section[aria-label="Треки"] h2');
     await expect(trackHeadings).toHaveCount(4);
   });
 

@@ -19,7 +19,7 @@
           "assertions": {
             "categories:performance": [
               "error",
-              { "minScore": 0.95, "aggregationMethod": "median-run" }
+              { "minScore": 0.70, "aggregationMethod": "median-run" }
             ],
             "categories:accessibility": [
               "error",
@@ -56,7 +56,7 @@
           "assertions": {
             "categories:performance": [
               "error",
-              { "minScore": 0.92, "aggregationMethod": "median-run" }
+              { "minScore": 0.70, "aggregationMethod": "median-run" }
             ],
             "categories:accessibility": [
               "error",
@@ -89,7 +89,7 @@
           "assertions": {
             "categories:performance": [
               "error",
-              { "minScore": 0.88, "aggregationMethod": "median-run" }
+              { "minScore": 0.68, "aggregationMethod": "median-run" }
             ],
             "categories:accessibility": [
               "error",

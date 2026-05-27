@@ -9,9 +9,9 @@ test.describe("Auth", () => {
     page,
   }) => {
     await page.goto("/register");
-    await expect(
-      page.getByRole("heading", { level: 1 }).or(page.getByText("РЕГИСТРАЦИЯ")),
-    ).toBeVisible();
+    // h1 is unique to the page; the header link "Регистрация" is also
+    // rendered in caption case, so match the form heading specifically.
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
     const uniq = `e2e-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     const email = `${uniq}@example.com`;
