@@ -64,7 +64,7 @@ export default function LoginPage() {
           <Link href="/" className="inline-block">
             <Wordmark size="md" />
           </Link>
-          <p className="text-caption mt-4">ВХОД</p>
+          <h1 className="text-caption mt-4">Вход</h1>
         </div>
 
         <form onSubmit={onSubmit} className="space-y-6">

@@ -71,7 +71,7 @@ export default function RegisterPage() {
           <Link href="/" className="inline-block">
             <Wordmark size="md" />
           </Link>
-          <p className="text-caption mt-4">РЕГИСТРАЦИЯ</p>
+          <h1 className="text-caption mt-4">Регистрация</h1>
         </div>
 
         <form onSubmit={onSubmit} className="space-y-6">
