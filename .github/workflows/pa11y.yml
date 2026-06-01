@@ -40,12 +40,13 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Install Chrome for Puppeteer
-        # pa11y-ci ships puppeteer-core (no bundled browser, no CLI). Use npx
-        # to fetch the full puppeteer package on demand and install Chrome
-        # into the default ~/.cache/puppeteer path that puppeteer-core looks
-        # up at launch time.
-        run: npx --yes puppeteer browsers install chrome
+        # pa11y-ci@4 -> pa11y@9 -> the full puppeteer package, whose postinstall
+        # downloads the version-matched Chrome into ~/.cache/puppeteer. pnpm 10
+        # blocks dependency build scripts by default, so puppeteer is opted back
+        # in via "pnpm.onlyBuiltDependencies" in package.json. This guarantees the
+        # Chrome build matches the puppeteer that pa11y launches (a floating
+        # `npx puppeteer browsers install chrome` could install a mismatched
+        # build and break the launch).
       - name: Apply migrations
         run: pnpm exec prisma migrate deploy
       - name: Build
